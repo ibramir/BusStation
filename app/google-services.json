@@ -1,0 +1,44 @@
+{
+  "project_info": {
+    "project_number": "740860828062",
+    "firebase_url": "https://bus-station-dc7d4.firebaseio.com",
+    "project_id": "bus-station-dc7d4",
+    "storage_bucket": "bus-station-dc7d4.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:740860828062:android:8e4d0f472287bbc3",
+        "android_client_info": {
+          "package_name": "com.ibramir.busstation"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "740860828062-rdk2jb3m0nt6ph9vn0h8qfmnbmg0hih9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.ibramir.busstation",
+            "certificate_hash": "a4f0853a2d947052c580991d22696ba2bf1b3eec"
+          }
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDLFPNNPyvbFI-IKZq2-qlsNRg7k1VrY7I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "740860828062-gjv7c5fnlc6l1lih64gcdm3oif8v5mu9.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
