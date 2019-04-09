@@ -22,7 +22,7 @@ public class Trip {
     private String id;
     private String source;
     private String destination;
-    private float price;
+    private double price;
     private Date time;
     private Vehicle vehicle;
     private Driver driver;
@@ -38,7 +38,7 @@ public class Trip {
     public String getDestination() {
         return destination;
     }
-    public float getPrice() {
+    public double getPrice() {
         return price;
     }
     public Date getTime() {
@@ -80,10 +80,10 @@ public class Trip {
         }
     }
 
-    public boolean reserveSeats(ReservationInfo reservation) {
-        if(vehicle.availableSeats() < reservation.getNumOfSeats())
+    public boolean reserveSeats(Ticket ticket) {
+        if(vehicle.availableSeats() < ticket.getNumOfSeats())
             return false;
-        reservations.add(reservation);
+        reservations.add(new ReservationInfo(ticket.getUid(), ticket.getTicketId(), ticket.getNumOfSeats()));
         return true;
     }
 

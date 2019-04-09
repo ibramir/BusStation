@@ -33,17 +33,9 @@ public final class Trips {
             data.put("price", t.getPrice());
             data.put("time", t.getTime());
             data.put("vehicle", t.getVehicle());
-            data.put("driver",
-                    FirebaseFirestore.getInstance().collection("drivers").document(t.getDriver().getUid()));
+            data.put("driver", t.getDriver().getUid());
+            data.put("reservations", t.getReservations());
             data.put("stops", t.getStops());
-            List<Map<String, Object>> reservations = new ArrayList<>();
-            for(ReservationInfo reservation: t.getReservations()) {
-                Map<String, Object> rInfo = new HashMap<>();
-                rInfo.put("uid", reservation.getUid());
-                rInfo.put("numOfSeats", reservation.getNumOfSeats());
-                reservations.add(rInfo);
-            }
-            data.put("reservations", reservations);
             try {
                 Tasks.await(FirebaseFirestore.getInstance()
                                 .collection("trips")
