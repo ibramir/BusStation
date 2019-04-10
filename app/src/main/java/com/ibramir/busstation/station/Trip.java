@@ -1,23 +1,23 @@
 package com.ibramir.busstation.station;
 
-import android.support.annotation.Nullable;
+import javax.annotation.Nullable;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.station.vehicles.Vehicle;
-import com.ibramir.busstation.users.Driver;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class Trip {
-    private DocumentReference documentReference;
+    private ListenerRegistration listenerRegistration;
 
     private String id;
     private String source;
@@ -25,9 +25,8 @@ public class Trip {
     private double price;
     private Date time;
     private Vehicle vehicle;
-    private Driver driver;
-    private Collection<ReservationInfo> reservations;
-    private List<String> stops;
+    private String driverId;
+    private Collection<String> ticketIds;
 
     public String getId() {
         return id;
@@ -47,27 +46,27 @@ public class Trip {
     public Vehicle getVehicle() {
         return vehicle;
     }
-    public Driver getDriver() {
-        return driver;
+    public String getDriverId() {
+        return driverId;
     }
-    public Collection<ReservationInfo> getReservations() {
-        return reservations;
+    public Collection<String> getTicketIds() {
+        return ticketIds;
     }
-    public List<String> getStops() {
-        return stops;
+    public ListenerRegistration getListenerRegistration() {
+        return listenerRegistration;
     }
 
-    void initializeDocumentListener() {
-        documentReference = FirebaseFirestore.getInstance().collection("trips")
+    void initializeDataListener() {
+        DocumentReference tripReference = FirebaseFirestore.getInstance().collection("trips")
                 .document(id);
-        documentReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
+        listenerRegistration = tripReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
                 if(e != null) {
                     return;
                 }
                 if(documentSnapshot == null || !documentSnapshot.exists()) {
-                    Trips.deleteTrip(Trip.this);
+                    TripManager.getInstance().delete(Trip.this);
                     return;
                 }
                 updateData(documentSnapshot.getData());
@@ -75,16 +74,17 @@ public class Trip {
         });
     }
     private void updateData(Map<String, Object> data) {
-        for(String field: data.keySet()) {
-            //TODO update data
-        }
+        source = (String) data.get("source");
+        destination = (String) data.get("destination");
+        price = (double) data.get("price");
+        time = ((Timestamp)data.get("time")).toDate();
+        driverId = (String) data.get("driverId");
+        ticketIds.addAll((Collection<String>) data.get("ticketIds"));
+
     }
 
-    public boolean reserveSeats(Ticket ticket) {
-        if(vehicle.availableSeats() < ticket.getNumOfSeats())
-            return false;
-        reservations.add(new ReservationInfo(ticket.getUid(), ticket.getTicketId(), ticket.getNumOfSeats()));
-        return true;
+    public static void reserveSeats(Ticket ticket) {
+        //TODO reservation info
     }
 
     public static Trip ofId(String id) {
@@ -100,9 +100,8 @@ public class Trip {
         private float price;
         private Date time;
         private Vehicle vehicle;
-        private Driver driver;
-        private Collection<ReservationInfo> reservations = null;
-        private List<String> stops;
+        private String driverId;
+        private Collection<String> ticketIds = null;
 
         public Builder from(String source) {
             this.source = source;
@@ -120,20 +119,16 @@ public class Trip {
             this.time = time;
             return this;
         }
-        public Builder withDriver(Driver driver) {
-            this.driver = driver;
+        public Builder withDriver(String driver) {
+            this.driverId = driver;
             return this;
         }
         public Builder withVehicle(Vehicle vehicle) {
             this.vehicle = vehicle;
             return this;
         }
-        public Builder withCustomers(Collection<ReservationInfo> customersUid) {
-            this.reservations = customersUid;
-            return this;
-        }
-        public Builder withStops(List<String> stops) {
-            this.stops = stops;
+        public Builder withCustomers(Collection<String> customersUid) {
+            this.ticketIds = customersUid;
             return this;
         }
 
@@ -144,10 +139,9 @@ public class Trip {
             trip.price = price;
             trip.time = time;
             trip.vehicle = vehicle;
-            trip.driver = driver;
-            trip.reservations = reservations;
-            trip.stops = stops;
-            new Trips.SaveTripTask().execute(trip);
+            trip.driverId = driverId;
+            trip.ticketIds = ticketIds;
+            TripManager.getInstance().save(trip);
             return trip;
         }
     }

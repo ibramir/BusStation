@@ -1,9 +1,21 @@
 package com.ibramir.busstation.station.vehicles;
 
-import com.ibramir.busstation.station.Trip;
+import javax.annotation.Nullable;
 
 public class Car extends Vehicle {
-    public Car(Trip assignedTrip) {
-        super(assignedTrip, 4);
+    private static final int MAX_SEATS = 4;
+
+    public Car() {
+        super(MAX_SEATS);
+    }
+
+    @Override
+    public double getSeatPrice(@Nullable SeatClass seatClass) {
+        return 100;
+    }
+
+    @Override
+    public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
+        return getAvailableSeats() >= numOfSeats;
     }
 }

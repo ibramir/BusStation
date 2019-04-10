@@ -2,9 +2,12 @@ package com.ibramir.busstation.users;
 
 import com.ibramir.busstation.station.Ticket;
 import com.ibramir.busstation.station.Trip;
+import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.util.Collection;
 import java.util.HashSet;
+
+import javax.annotation.Nullable;
 
 public class Customer extends User {
 
@@ -18,24 +21,23 @@ public class Customer extends User {
         tickets = new HashSet<>();
     }
 
-    public boolean reserveSeats(Trip trip1, Trip trip2, int numOfSeats) {
-        double price = trip1.getPrice();
-        String trip2Id = null;
-        if(trip2 != null) {
-            trip2Id = trip2.getId();
-            price += trip2.getPrice();
-            price *= Ticket.TWO_WAY_RATE;
+    public boolean reserveSeats(Trip trip1, @Nullable Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
+        if(!trip1.getVehicle().availableSeats(numOfSeats, seatClass)
+        || trip2 != null && !trip2.getVehicle().availableSeats(numOfSeats, seatClass)) {
+            return false;
         }
-        Ticket ticket = new Ticket(getUid(), trip1.getId(), trip2Id, numOfSeats, price);
-        if(trip1.reserveSeats(ticket)) {
-            tickets.add(ticket);
-            //TODO firebase reserve
-            return true;
-        }
-        return false;
+        Ticket ticket = Ticket.reserveTicket(this, trip1, trip2, numOfSeats, seatClass);
+        tickets.add(ticket);
+        return true;
     }
     public void cancelReservation(String ticketId) {
-        //TODO cancel
+        for(Ticket t: tickets) {
+            if(t.equals(ticketId)) {
+                t.cancelTicket();
+                tickets.remove(t);
+                return;
+            }
+        }
     }
 
     @Override

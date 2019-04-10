@@ -5,7 +5,7 @@ import java.util.HashSet;
 
 public class Driver extends User {
 
-    Collection<String> assignedTrips;
+    private Collection<String> assignedTrips;
 
     public Driver(String uid) {
         this(uid, null);

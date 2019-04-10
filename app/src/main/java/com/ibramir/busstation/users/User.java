@@ -1,6 +1,6 @@
 package com.ibramir.busstation.users;
 
-import android.support.annotation.Nullable;
+import javax.annotation.Nullable;
 
 public abstract class User {
     private String uid;
