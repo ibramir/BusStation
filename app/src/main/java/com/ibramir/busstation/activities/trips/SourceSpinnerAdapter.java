@@ -57,14 +57,4 @@ public class SourceSpinnerAdapter extends BaseAdapter {
         textView.setText(tripList.get(position).getSource());
         return item;
     }
-
-    /*@Override
-    public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        View item = convertView;
-        if(item == null)
-            item = LayoutInflater.from(context).inflate(R.layout.support_simple_spinner_dropdown_item, parent, false);
-        TextView textview = item.findViewById(android.R.id.text1);
-        textview.setText(tripList.get(position).getSource());
-        return item;
-    }*/
 }

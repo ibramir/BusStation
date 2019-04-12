@@ -19,14 +19,16 @@ public class Customer extends User implements RetrieveListener<Ticket> {
 
     private Collection<Ticket> tickets;
 
-    public Customer(String uid) {
+    Customer(String uid) {
         this(uid, null);
     }
     Customer(String uid, String email) {
         super(uid, email);
         tickets = new HashSet<>();
     }
-
+    Customer(String uid, String email, String name) {
+        super(uid, email, name);
+    }
     public Collection<Ticket> getTickets() {
         return tickets;
     }

@@ -11,6 +11,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.ibramir.busstation.R;
+import com.ibramir.busstation.activities.picker.PickerActivity;
 import com.ibramir.busstation.station.trips.TripManager;
 import com.ibramir.busstation.users.User;
 
@@ -44,7 +45,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loggedIn() {
-        //TODO next activity
+        startActivity(new Intent(this, PickerActivity.class));
+        finish();
     }
 
     public void login(View v) {

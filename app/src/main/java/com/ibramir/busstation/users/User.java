@@ -2,6 +2,7 @@ package com.ibramir.busstation.users;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.ibramir.busstation.RetrieveListener;
 
 import javax.annotation.Nullable;
@@ -21,13 +22,29 @@ public abstract class User {
         DRIVER,
         MANAGER
     }
-
+    public static User fromDocument(DocumentSnapshot d) {
+        if(d == null || !d.exists())
+            return null;
+        String uid = d.getString("name"), email = d.getString("email"), name = d.getString("name");
+        switch(Type.valueOf(d.getString("type"))) {
+            case CUSTOMER:
+                return new Customer(uid, email, name);
+            case DRIVER:
+                return new Driver(uid, email, name);
+        }
+        return null;
+    }
     User(String uid) {
         this(uid, null);
     }
     User(String uid, String email) {
         this.uid = uid;
         this.email = email;
+    }
+    public User(String uid, String email, String name) {
+        this.uid = uid;
+        this.email = email;
+        this.name = name;
     }
 
     private static void register(FirebaseUser user, Type type) {

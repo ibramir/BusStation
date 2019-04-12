@@ -18,12 +18,15 @@ public class Driver extends User implements RetrieveListener<Trip> {
 
     private Collection<Trip> assignedTrips;
 
-    public Driver(String uid) {
+    Driver(String uid) {
         this(uid, null);
     }
-    public Driver(String uid, String email) {
+    Driver(String uid, String email) {
         super(uid, email);
         assignedTrips = new HashSet<>();
+    }
+    Driver(String uid, String email, String name) {
+        super(uid, email, name);
     }
 
     public Collection<Trip> getAssignedTrips() {

@@ -1,5 +1,6 @@
 package com.ibramir.busstation.activities.trips;
 
+import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -7,13 +8,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
-import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.ibramir.busstation.R;
+import com.ibramir.busstation.activities.picker.PickerActivity;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
 
@@ -26,40 +30,32 @@ import java.util.Locale;
 
 public class TripsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
-    private EditText dateText;
     private Date dateFilter;
     private RecyclerView recyclerView;
     private TripsAdapter adapter;
     private List<Trip> filteredTrips;
     private Trip filter;
+    private String mode;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trips);
+        mode = getIntent().getAction();
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
 
-        dateText = findViewById(R.id.dateText);
-        dateText.setKeyListener(null);
         recyclerView = findViewById(R.id.tripsRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         filteredTrips = new ArrayList<>();
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
         recyclerView.setAdapter(adapter);
-        Spinner sourceSpinner = findViewById(R.id.sourceSpinner);
-        sourceSpinner.setAdapter(new SourceSpinnerAdapter(this));
-        Spinner destinationSpinner = findViewById(R.id.destinationSpinner);
-        DestinationSpinnerAdapter destinationAdapter = new DestinationSpinnerAdapter(this, new ArrayList<Trip>());
-        destinationSpinner.setAdapter(destinationAdapter);
-        sourceSpinner.setOnItemSelectedListener(destinationAdapter);
-        destinationSpinner.setOnItemSelectedListener(this);
     }
 
-    public void openPicker(View v) {
+    private void openPicker(final TextView dateText) {
         final Calendar c = Calendar.getInstance();
         DatePickerDialog datePickerDialog = new DatePickerDialog(this,
                 new DatePickerDialog.OnDateSetListener() {
@@ -80,6 +76,55 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         datePickerDialog.show();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        if(mode.equals(PickerActivity.BROWSE)) {
+            getMenuInflater().inflate(R.menu.trips_menu, menu);
+            return true;
+        }
+        else if(mode.equals(PickerActivity.MANAGE)) {
+            getMenuInflater().inflate(R.menu.manage_menu, menu);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.filter_action:
+                openFilter();
+                return true;
+            case R.id.add_action:
+                //TODO add trip activity
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+    private void openFilter() {
+        AlertDialog.Builder builder =new AlertDialog.Builder(this);
+        builder.setTitle("Filter trips");
+        builder.setCancelable(true);
+        View body =getLayoutInflater().inflate(R.layout.trips_filter, null);
+
+        final TextView dateText = body.findViewById(R.id.dateText);
+        dateText.setKeyListener(null);
+        Spinner sourceSpinner = body.findViewById(R.id.sourceSpinner);
+        sourceSpinner.setAdapter(new SourceSpinnerAdapter(this));
+        Spinner destinationSpinner = body.findViewById(R.id.destinationSpinner);
+        DestinationSpinnerAdapter destinationAdapter = new DestinationSpinnerAdapter(this, new ArrayList<Trip>());
+        destinationSpinner.setAdapter(destinationAdapter);
+        sourceSpinner.setOnItemSelectedListener(destinationAdapter);
+        destinationSpinner.setOnItemSelectedListener(this);
+        body.findViewById(R.id.dateText).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openPicker(dateText);
+            }
+        });
+        builder.setView(body).create().show();
     }
 
     @Override

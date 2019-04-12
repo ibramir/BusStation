@@ -147,6 +147,10 @@ public class Trip implements RetrieveListener<Vehicle> {
             this.vehicle = vehicle;
             return this;
         }
+        public Builder withVehicle(Vehicle.Type type) {
+            this.vehicle = Vehicle.createVehicle(type);
+            return this;
+        }
         public Builder withCustomers(Collection<String> customersUid) {
             this.ticketIds = customersUid;
             return this;

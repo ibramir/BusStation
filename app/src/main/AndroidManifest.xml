@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".activities.trips.TripsActivity"></activity>
+        <activity android:name=".activities.picker.PickerActivity"></activity>
+        <activity android:name=".activities.trips.TripsActivity" />
         <activity android:name=".activities.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
