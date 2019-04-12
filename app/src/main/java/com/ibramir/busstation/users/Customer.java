@@ -1,5 +1,10 @@
 package com.ibramir.busstation.users;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.trips.Trip;
@@ -52,5 +57,28 @@ public class Customer extends User implements RetrieveListener<Ticket> {
     @Override
     public synchronized void onRetrieve(Ticket obj) {
         tickets.add(obj);
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        TicketListener listener = new TicketListener(obj);
+        ListenerRegistration r = db.collection("trips").document(obj.getTicketId())
+                .addSnapshotListener(listener);
+        listener.registration = r;
+    }
+
+    private class TicketListener implements EventListener<DocumentSnapshot> {
+        private Ticket ticket;
+        private ListenerRegistration registration;
+        private TicketListener(Ticket ticket) {
+            this.ticket = ticket;
+        }
+
+        @Override
+        public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+            if(documentSnapshot == null) {
+                tickets.remove(ticket);
+                ticket = null;
+                registration.remove();
+                registration = null;
+            }
+        }
     }
 }

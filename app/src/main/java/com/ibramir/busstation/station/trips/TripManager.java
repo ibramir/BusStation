@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -14,6 +15,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.firestore.WriteBatch;
 import com.ibramir.busstation.FirestoreActions;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.vehicles.VehicleManager;
@@ -76,11 +78,16 @@ public class TripManager implements FirestoreActions<Trip> {
                                     else
                                         trips.add(trip);
                                 }
-                                else if (documentChange.getType() == DocumentChange.Type.REMOVED)
-                                    trips.remove(Trip.ofId(documentChange.getDocument().getId()));
-                                else if (documentChange.getType() == DocumentChange.Type.MODIFIED)
-                                    trips.set(trips.indexOf(Trip.ofId(documentChange.getDocument().getId())),
-                                            trip);
+                                else {
+                                    String tripId = documentChange.getDocument().getId();
+                                    if (documentChange.getType() == DocumentChange.Type.REMOVED) {
+                                        deleteTickets(tripId);
+                                        trips.remove(Trip.ofId(tripId));
+                                    }
+                                    else if (documentChange.getType() == DocumentChange.Type.MODIFIED)
+                                        trips.set(trips.indexOf(Trip.ofId(tripId)),
+                                                trip);
+                                }
                             }
                         }
                     }
@@ -91,7 +98,18 @@ public class TripManager implements FirestoreActions<Trip> {
     public synchronized void delete(Trip obj) {
         if(obj.getListenerRegistration() != null)
             obj.getListenerRegistration().remove();
+        deleteTickets(obj.getId());
+        trips.remove(obj);
         FirebaseFirestore.getInstance().collection("trips").document(obj.getId()).delete();
+    }
+    private void deleteTickets(String tripId) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        WriteBatch batch = db.batch();
+        CollectionReference ticketsRef = db.collection("tickets");
+        for(String ticketId: findTripById(tripId).getTicketIds()) {
+            batch.delete(ticketsRef.document(ticketId));
+        }
+        batch.commit();
     }
     @Override
     public synchronized void save(Trip obj) {
@@ -102,12 +120,7 @@ public class TripManager implements FirestoreActions<Trip> {
         if(tripId == null)
             return;
         if(trips != null) {
-            for(Trip t: trips) {
-                if(t.getId().equals(tripId)) {
-                    retrieveListener.onRetrieve(t);
-                    return;
-                }
-            }
+            retrieveListener.onRetrieve(findTripById(tripId));
         }
         else {
             listeners.put(tripId, retrieveListener);
@@ -197,13 +210,6 @@ public class TripManager implements FirestoreActions<Trip> {
             }
             return null;
         }
-
-        /*@Override
-        protected void onPostExecute(Collection<Trip> trips) {
-            super.onPostExecute(trips);
-            if(trips != null)
-                TripManager.getInstance().trips.addAll(trips);
-        }*/
     }
 
     private synchronized static Trip fromSnapshot(DocumentSnapshot d) {
