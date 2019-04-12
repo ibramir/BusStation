@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Bus Station</string>
+    <string name="login">Choose account type</string>
 </resources>

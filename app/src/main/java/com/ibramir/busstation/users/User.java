@@ -1,5 +1,7 @@
 package com.ibramir.busstation.users;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.ibramir.busstation.RetrieveListener;
 
 import javax.annotation.Nullable;
@@ -14,6 +16,12 @@ public abstract class User {
         return currentUser;
     }
 
+    public enum Type {
+        CUSTOMER,
+        DRIVER,
+        MANAGER
+    }
+
     User(String uid) {
         this(uid, null);
     }
@@ -22,16 +30,36 @@ public abstract class User {
         this.email = email;
     }
 
-    public static void login(String uid) {
+    private static void register(FirebaseUser user, Type type) {
+        switch (type) {
+            case CUSTOMER:
+                currentUser = new Customer(user.getUid(), user.getEmail());
+                break;
+            case DRIVER:
+                currentUser = new Driver(user.getUid(), user.getEmail());
+                break;
+            case MANAGER:
+                currentUser = new Manager(user.getUid(), user.getEmail());
+                break;
+        }
+        currentUser.setName(user.getDisplayName());
+    }
+    public static void login(String uid, final Type type) {
         UserManager.getInstance().retrieve(uid, new RetrieveListener<User>() {
             @Override
             public void onRetrieve(User obj) {
-                currentUser = obj;
+                if(obj == null)
+                    register(FirebaseAuth.getInstance().getCurrentUser(),type);
+                else
+                    currentUser = obj;
             }
         });
     }
     public static void logout(){
         currentUser = null;
+    }
+    public static boolean isLoggedIn() {
+        return currentUser == null;
     }
 
     public String getUid() {

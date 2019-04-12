@@ -36,7 +36,7 @@ class UserManager implements FirestoreActions<User> {
     private UserManager() {
     }
 
-    private Map<String, RetrieveListener<User>> listeners = new HashMap<>();
+    private RetrieveListener<User> retrieveListener;
 
     @Override
     public void delete(User obj) {
@@ -103,7 +103,7 @@ class UserManager implements FirestoreActions<User> {
 
     @Override
     public void retrieve(String id, RetrieveListener<User> retrieveListener) {
-        listeners.put(id, retrieveListener);
+        this.retrieveListener = retrieveListener;
         new RetrieveTask().execute(id);
     }
     private static class RetrieveTask extends AsyncTask<String,Void,User> {
@@ -113,6 +113,8 @@ class UserManager implements FirestoreActions<User> {
                 DocumentSnapshot d = Tasks.await(
                         FirebaseFirestore.getInstance().collection("users").document(strings[0]).get(),
                         10, TimeUnit.SECONDS);
+                if(!d.exists())
+                    return null;
                 User ret = null;
                 switch ((String)d.get("type")) {
                     case "Customer": ret = getCustomer(d); break;
@@ -150,12 +152,8 @@ class UserManager implements FirestoreActions<User> {
         @Override
         protected void onPostExecute(User user) {
             super.onPostExecute(user);
-            Map<String, RetrieveListener<User>> listeners = UserManager.getInstance().listeners;
-            RetrieveListener<User> listener = listeners.get(user.getUid());
-            if(listener == null)
-                return;
-            listener.onRetrieve(user);
-            listeners.remove(user.getUid());
+            if(getInstance().retrieveListener != null)
+                getInstance().retrieveListener.onRetrieve(user);
         }
     }
 }

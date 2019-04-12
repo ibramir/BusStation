@@ -49,7 +49,7 @@ public class Driver extends User implements RetrieveListener<Trip> {
 
         @Override
         public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-            if(documentSnapshot == null) {
+            if(documentSnapshot == null || !documentSnapshot.exists()) {
                 assignedTrips.remove(trip);
                 trip = null;
                 registration.remove();
