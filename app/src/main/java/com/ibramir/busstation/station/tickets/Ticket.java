@@ -11,7 +11,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 public class Ticket implements RetrieveListener<Trip> {
-    public static final double ROUND_RATE = 0.9;
+    private static final double ROUND_RATE = 0.9;
 
     private ListenerRegistration listenerRegistration;
 
@@ -34,6 +34,7 @@ public class Ticket implements RetrieveListener<Trip> {
         if(trip2 != null)
             trip2.reserveSeats(t);
         t.ticketId = UUID.randomUUID().toString();
+        TicketManager.getInstance().save(t);
         return t;
     }
 
@@ -66,7 +67,7 @@ public class Ticket implements RetrieveListener<Trip> {
     }
 
     public void cancelTicket() {
-        //TODO cancel
+        TicketManager.getInstance().delete(this);
     }
 
     public String getTicketId() {

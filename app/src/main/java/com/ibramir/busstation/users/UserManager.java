@@ -14,6 +14,7 @@ import com.google.firebase.firestore.SetOptions;
 import com.ibramir.busstation.FirestoreActions;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
+import com.ibramir.busstation.station.tickets.TicketManager;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
 
@@ -129,11 +130,9 @@ class UserManager implements FirestoreActions<User> {
         private Customer getCustomer(DocumentSnapshot d) {
             Customer ret = new Customer((String)d.get("uid"), (String)d.get("email"));
             ret.setName((String)d.get("name"));
-            List<Ticket> tickets = new ArrayList<>();
             for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("tickets")) {
-                //TODO retrieve tickets
+                TicketManager.getInstance().retrieve(tRef.getId(),ret);
             }
-            ret.setTickets(tickets);
             return ret;
         }
         private Manager getManager(DocumentSnapshot d) {

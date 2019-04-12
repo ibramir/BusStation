@@ -1,5 +1,7 @@
 package com.ibramir.busstation.station.vehicles;
 
+import com.google.firebase.firestore.DocumentSnapshot;
+
 import javax.annotation.Nullable;
 
 public class MiniBus extends Vehicle {
@@ -9,17 +11,24 @@ public class MiniBus extends Vehicle {
     private int economySeats = MAX_ECONOMY;
     private int comfortSeats = MAX_COMFORT;
 
-    public MiniBus() {
+    MiniBus() {
         super(16);
+    }
+
+    public int getEconomySeats() {
+        return economySeats;
+    }
+    public int getComfortSeats() {
+        return comfortSeats;
     }
 
     @Override
     public void reserveSeats(int numOfSeats, SeatClass seatClass) {
-        super.reserveSeats(numOfSeats);
         if(seatClass == SeatClass.ECONOMY)
             economySeats -= numOfSeats;
         else if(seatClass == SeatClass.COMFORT)
             comfortSeats -= numOfSeats;
+        super.reserveSeats(numOfSeats);
     }
     @Override
     public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
@@ -31,6 +40,13 @@ public class MiniBus extends Vehicle {
             return comfortSeats-numOfSeats >= 0;
         return false;
     }
+
+    @Override
+    void initFromDocument(DocumentSnapshot d) {
+        economySeats = (int) d.get("economySeats");
+        comfortSeats = (int) d.get("comfortSeats");
+    }
+
     @Override
     public double getSeatPrice(@Nullable SeatClass seatClass) {
         if(seatClass == SeatClass.COMFORT)

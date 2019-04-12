@@ -16,6 +16,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ibramir.busstation.FirestoreActions;
 import com.ibramir.busstation.RetrieveListener;
+import com.ibramir.busstation.station.vehicles.VehicleManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -119,16 +120,17 @@ public class TripManager implements FirestoreActions<Trip> {
         @Override
         protected Void doInBackground(Trip... trips) {
             Trip t = trips[0];
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
             Map<String, Object> data = new HashMap<>();
             data.put("source", t.getSource());
             data.put("destination", t.getDestination());
             data.put("price", t.getPrice());
             data.put("time", t.getTime());
-            data.put("vehicle", t.getVehicle().getVehicleId());
+            DocumentReference vehicleRef = db.collection("vehicles").document(t.getVehicle().getVehicleId());
+            data.put("vehicle", vehicleRef);
             data.put("driver", t.getDriverId());
             try {
-                DocumentReference tripReference = FirebaseFirestore.getInstance()
-                        .collection("trips").document(t.getId());
+                DocumentReference tripReference = db.collection("trips").document(t.getId());
                 Tasks.await(tripReference.set(data, SetOptions.merge()), 10, TimeUnit.SECONDS);
                 Tasks.await(tripReference.update("tickets",
                         FieldValue.arrayUnion(t.getTicketIds().toArray())),
@@ -216,7 +218,8 @@ public class TripManager implements FirestoreActions<Trip> {
         for(DocumentReference ticketRef: (ArrayList<DocumentReference>)d.get("tickets"))
             ticketIds.add(ticketRef.getId());
         b.withTickets(ticketIds);
-        //TODO vehicle
-        return b.build();
+        Trip ret = b.build();
+        VehicleManager.getInstance().retrieve(((DocumentReference)d.get("vehicle")).getId(),ret);
+        return ret;
     }
 }

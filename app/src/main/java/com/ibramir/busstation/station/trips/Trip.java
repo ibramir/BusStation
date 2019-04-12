@@ -7,6 +7,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class Trip {
+public class Trip implements RetrieveListener<Vehicle> {
     private ListenerRegistration listenerRegistration;
 
     private String id;
@@ -92,6 +93,11 @@ public class Trip {
     public void reserveSeats(Ticket ticket) {
         vehicle.reserveSeats(ticket.getNumOfSeats(), ticket.getSeatClass());
 
+    }
+
+    @Override
+    public void onRetrieve(Vehicle obj) {
+        vehicle = obj;
     }
 
     public static Trip ofId(String id) {
