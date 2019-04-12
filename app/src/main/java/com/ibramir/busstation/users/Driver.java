@@ -1,7 +1,7 @@
 package com.ibramir.busstation.users;
 
 import com.ibramir.busstation.RetrieveListener;
-import com.ibramir.busstation.station.Trip;
+import com.ibramir.busstation.station.trips.Trip;
 
 import java.util.Collection;
 import java.util.HashSet;

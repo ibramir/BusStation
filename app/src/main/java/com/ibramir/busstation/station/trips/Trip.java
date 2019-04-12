@@ -1,4 +1,4 @@
-package com.ibramir.busstation.station;
+package com.ibramir.busstation.station.trips;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
@@ -7,6 +7,7 @@ import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
+import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.util.Collection;
@@ -88,8 +89,9 @@ public class Trip {
     public int getAvailableSeats() {
         return vehicle.getAvailableSeats();
     }
-    public static void reserveSeats(Ticket ticket) {
-        //TODO reservation info
+    public void reserveSeats(Ticket ticket) {
+        vehicle.reserveSeats(ticket.getNumOfSeats(), ticket.getSeatClass());
+
     }
 
     public static Trip ofId(String id) {

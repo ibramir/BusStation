@@ -1,7 +1,8 @@
 package com.ibramir.busstation.users;
 
-import com.ibramir.busstation.station.Ticket;
-import com.ibramir.busstation.station.Trip;
+import com.ibramir.busstation.RetrieveListener;
+import com.ibramir.busstation.station.tickets.Ticket;
+import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.HashSet;
 
 import javax.annotation.Nullable;
 
-public class Customer extends User {
+public class Customer extends User implements RetrieveListener<Ticket> {
 
     private Collection<Ticket> tickets;
 
@@ -29,7 +30,7 @@ public class Customer extends User {
         this.tickets = tickets;
     }
 
-    public boolean reserveSeats(Trip trip1, @Nullable Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
+    public boolean reserveTicket(Trip trip1, @Nullable Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
         if(!trip1.getVehicle().availableSeats(numOfSeats, seatClass)
         || trip2 != null && !trip2.getVehicle().availableSeats(numOfSeats, seatClass)) {
             return false;
@@ -48,4 +49,8 @@ public class Customer extends User {
         }
     }
 
+    @Override
+    public synchronized void onRetrieve(Ticket obj) {
+        tickets.add(obj);
+    }
 }

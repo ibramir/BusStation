@@ -13,9 +13,9 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.SetOptions;
 import com.ibramir.busstation.FirestoreActions;
 import com.ibramir.busstation.RetrieveListener;
-import com.ibramir.busstation.station.Ticket;
-import com.ibramir.busstation.station.Trip;
-import com.ibramir.busstation.station.TripManager;
+import com.ibramir.busstation.station.tickets.Ticket;
+import com.ibramir.busstation.station.trips.Trip;
+import com.ibramir.busstation.station.trips.TripManager;
 
 import java.util.ArrayList;
 import java.util.Collection;

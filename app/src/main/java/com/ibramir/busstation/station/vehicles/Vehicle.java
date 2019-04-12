@@ -1,6 +1,6 @@
 package com.ibramir.busstation.station.vehicles;
 
-import com.ibramir.busstation.station.Trip;
+import com.ibramir.busstation.station.trips.Trip;
 
 import javax.annotation.Nullable;
 

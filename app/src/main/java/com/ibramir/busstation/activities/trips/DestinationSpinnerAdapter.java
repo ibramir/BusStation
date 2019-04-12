@@ -11,8 +11,8 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import com.ibramir.busstation.R;
-import com.ibramir.busstation.station.Trip;
-import com.ibramir.busstation.station.TripManager;
+import com.ibramir.busstation.station.trips.Trip;
+import com.ibramir.busstation.station.trips.TripManager;
 
 import java.util.List;
 

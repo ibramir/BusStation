@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.ibramir.busstation.R;
-import com.ibramir.busstation.station.Trip;
+import com.ibramir.busstation.station.trips.Trip;
 
 import java.text.SimpleDateFormat;
 import java.util.List;

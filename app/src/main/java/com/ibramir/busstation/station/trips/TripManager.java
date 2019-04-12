@@ -1,4 +1,4 @@
-package com.ibramir.busstation.station;
+package com.ibramir.busstation.station.trips;
 
 import android.os.AsyncTask;
 import android.support.annotation.Nullable;
@@ -98,8 +98,20 @@ public class TripManager implements FirestoreActions<Trip> {
     }
     @Override
     public synchronized void retrieve(String tripId, RetrieveListener<Trip> retrieveListener) {
-        listeners.put(tripId, retrieveListener);
-        new RetrieveTask().execute(tripId);
+        if(tripId == null)
+            return;
+        if(trips != null) {
+            for(Trip t: trips) {
+                if(t.getId().equals(tripId)) {
+                    retrieveListener.onRetrieve(t);
+                    return;
+                }
+            }
+        }
+        else {
+            listeners.put(tripId, retrieveListener);
+            new RetrieveTask().execute(tripId);
+        }
     }
 
 
