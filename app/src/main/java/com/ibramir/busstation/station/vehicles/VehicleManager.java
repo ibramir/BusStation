@@ -84,6 +84,8 @@ public class VehicleManager implements FirestoreActions<Vehicle> {
                 DocumentSnapshot d = Tasks.await(FirebaseFirestore.getInstance()
                         .collection("vehicles").document(strings[0]).get(),
                         15, TimeUnit.SECONDS);
+                if(!d.exists())
+                    return null;
                 Vehicle ret = Vehicle.fromDocument(d);
                 TripManager.getInstance().retrieve((String)d.get("assignedTrip"), ret);
                 return ret;
@@ -97,6 +99,8 @@ public class VehicleManager implements FirestoreActions<Vehicle> {
 
         @Override
         protected void onPostExecute(Vehicle vehicle) {
+            if(vehicle == null)
+                return;
             Map<String, RetrieveListener<Vehicle>> listeners = VehicleManager.getInstance().listeners;
             RetrieveListener<Vehicle> listener = listeners.get(vehicle.getVehicleId());
             if(listener != null) {

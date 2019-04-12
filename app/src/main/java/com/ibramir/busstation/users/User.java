@@ -43,6 +43,7 @@ public abstract class User {
                 break;
         }
         currentUser.setName(user.getDisplayName());
+        UserManager.getInstance().save(currentUser);
     }
     public static void login(String uid, final Type type) {
         UserManager.getInstance().retrieve(uid, new RetrieveListener<User>() {

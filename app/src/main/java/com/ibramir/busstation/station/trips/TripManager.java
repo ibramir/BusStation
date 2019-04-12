@@ -55,43 +55,7 @@ public class TripManager implements FirestoreActions<Trip> {
         if(trips != null)
             return;
         trips = new ArrayList<>();
-        try {
-            Collection<Trip> tripCollection = new RetrieveAllTask().execute().get();
-            trips.addAll(tripCollection);
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        FirebaseFirestore.getInstance().collection("trips")
-                .addSnapshotListener(new EventListener<QuerySnapshot>() {
-                    @Override
-                    public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
-                        if(queryDocumentSnapshots == null)
-                            return;
-                        synchronized (trips) {
-                            for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
-                                Trip trip = fromSnapshot(documentChange.getDocument());
-                                if (documentChange.getType() == DocumentChange.Type.ADDED) {
-                                    int i;
-                                    if((i=trips.indexOf(trip)) != -1)
-                                        trips.set(i, trip);
-                                    else
-                                        trips.add(trip);
-                                }
-                                else {
-                                    String tripId = documentChange.getDocument().getId();
-                                    if (documentChange.getType() == DocumentChange.Type.REMOVED) {
-                                        deleteTickets(tripId);
-                                        trips.remove(Trip.ofId(tripId));
-                                    }
-                                    else if (documentChange.getType() == DocumentChange.Type.MODIFIED)
-                                        trips.set(trips.indexOf(Trip.ofId(tripId)),
-                                                trip);
-                                }
-                            }
-                        }
-                    }
-                });
+        new RetrieveAllTask().execute();
     }
 
     @Override
@@ -209,6 +173,42 @@ public class TripManager implements FirestoreActions<Trip> {
                 e.printStackTrace();
             }
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Collection<Trip> result) {
+            final List<Trip> trips = getInstance().trips;
+            trips.addAll(result);
+            FirebaseFirestore.getInstance().collection("trips")
+                    .addSnapshotListener(new EventListener<QuerySnapshot>() {
+                        @Override
+                        public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                            if(queryDocumentSnapshots == null)
+                                return;
+                            synchronized (trips) {
+                                for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
+                                    Trip trip = fromSnapshot(documentChange.getDocument());
+                                    if (documentChange.getType() == DocumentChange.Type.ADDED) {
+                                        int i;
+                                        if((i=trips.indexOf(trip)) != -1)
+                                            trips.set(i, trip);
+                                        else
+                                            trips.add(trip);
+                                    }
+                                    else {
+                                        String tripId = documentChange.getDocument().getId();
+                                        if (documentChange.getType() == DocumentChange.Type.REMOVED) {
+                                            getInstance().deleteTickets(tripId);
+                                            trips.remove(Trip.ofId(tripId));
+                                        }
+                                        else if (documentChange.getType() == DocumentChange.Type.MODIFIED)
+                                            trips.set(trips.indexOf(Trip.ofId(tripId)),
+                                                    trip);
+                                    }
+                                }
+                            }
+                        }
+                    });
         }
     }
 

@@ -11,7 +11,7 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.ibramir.busstation.R;
-import com.ibramir.busstation.activities.trips.TripsActivity;
+import com.ibramir.busstation.station.trips.TripManager;
 import com.ibramir.busstation.users.User;
 
 import java.util.Arrays;
@@ -26,15 +26,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Intent intent = new Intent(this, TripsActivity.class);
-        startActivity(intent);
+        //Intent intent = new Intent(this, TripsActivity.class);
+        //startActivity(intent);
         Toolbar toolbar = findViewById(R.id.loginToolbar);
-        toolbar.setTitle(R.string.project_id);
+        TripManager.getInstance().fetchTrips();
+        toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if(user != null) {
-            User.login(user.getUid(), null);
+            User.login(user.getUid(), userType);
             loggedIn();
         }
         else {

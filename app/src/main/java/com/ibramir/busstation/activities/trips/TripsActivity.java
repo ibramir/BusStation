@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.DatePicker;
@@ -30,11 +31,16 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     private RecyclerView recyclerView;
     private TripsAdapter adapter;
     private List<Trip> filteredTrips;
+    private Trip filter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trips);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.app_name);
+        setSupportActionBar(toolbar);
 
         dateText = findViewById(R.id.dateText);
         dateText.setKeyListener(null);
@@ -62,6 +68,9 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
                         c.set(year, month, dayOfMonth, 0, 0, 0);
                         dateFilter = c.getTime();
                         dateText.setText(new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).format(dateFilter));
+                        if(filter != null) {
+                            updateData();
+                        }
                     }
                 }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         datePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
@@ -82,13 +91,29 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
         filteredTrips.clear();
-        Trip filter = (Trip) parent.getItemAtPosition(position);
-        for(Trip t: TripManager.getInstance().getTrips()) {
-            if(t.getSource().equals(filter.getSource()) && t.getDestination().equals(filter.getDestination()))
-                filteredTrips.add(t);
+        filter = (Trip) parent.getItemAtPosition(position);
+        updateData();
+    }
+
+    private void updateData() {
+        if (dateFilter == null) {
+            for (Trip t : TripManager.getInstance().getTrips()) {
+                if (t.getSource().equals(filter.getSource())
+                        && t.getDestination().equals(filter.getDestination()))
+                    filteredTrips.add(t);
+            }
+        }
+        else {
+            for (Trip t : TripManager.getInstance().getTrips()) {
+                if (t.getSource().equals(filter.getSource())
+                        && t.getDestination().equals(filter.getDestination())
+                        && t.getTime().after(dateFilter))
+                    filteredTrips.add(t);
+            }
         }
         adapter.notifyDataSetChanged();
     }
+
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
