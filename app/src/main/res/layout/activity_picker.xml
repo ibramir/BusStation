@@ -33,11 +33,21 @@
         app:layout_constraintTop_toBottomOf="@+id/toolbar">
 
         <Button
-            android:id="@+id/tripsButton"
+            android:id="@+id/bookOneButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:onClick="showTrips"
-            android:text="Browse Trips"
+            android:text="Book Trip"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/toolbar" />
+
+        <Button
+            android:id="@+id/bookTwoButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:onClick="showTrips"
+            android:text="Book Round Trip"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/toolbar" />
@@ -50,7 +60,7 @@
             android:text="My Trips"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/tripsButton" />
+            app:layout_constraintTop_toBottomOf="@+id/bookOneButton" />
 
         <Button
             android:id="@+id/manageButton"

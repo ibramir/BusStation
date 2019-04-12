@@ -71,18 +71,12 @@ public class TicketManager implements FirestoreActions<Ticket> {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                 DocumentSnapshot d = Tasks.await(db.collection("tickets").document(strings[0]).get(),
                         15, TimeUnit.SECONDS);
-                double price;
-                Object o = d.get("price");
-                if(o instanceof Long)
-                    price = ((Long) o).doubleValue();
-                else
-                    price = (double) o;
-                Ticket ret = new Ticket(d.getId(),(String)d.get("uid"),
-                        (int)d.get("numOfSeats"), price,
-                        Vehicle.SeatClass.valueOf((String)d.get("seatClass")));
+                Ticket ret = new Ticket(d.getId(),d.getString("uid"),
+                        d.getLong("numOfSeats").intValue(), d.getDouble("price"),
+                        Vehicle.SeatClass.valueOf(d.getString("seatClass")));
                 TripManager tripManager = TripManager.getInstance();
-                tripManager.retrieve((String)d.get("trip1"), ret);
-                tripManager.retrieve((String)d.get("trip2"), ret);
+                tripManager.retrieve(d.getString("trip1"), ret);
+                tripManager.retrieve(d.getString("trip2"), ret);
                 return ret;
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

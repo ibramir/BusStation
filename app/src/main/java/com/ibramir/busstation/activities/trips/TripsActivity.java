@@ -3,7 +3,9 @@ package com.ibramir.busstation.activities.trips;
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -37,6 +39,8 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     private Trip filter;
     private String mode;
 
+    private Trip trip1, trip2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,6 +53,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
         recyclerView = findViewById(R.id.tripsRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setHasFixedSize(true);
         filteredTrips = new ArrayList<>();
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
@@ -80,7 +85,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(mode.equals(PickerActivity.BROWSE)) {
+        if(mode.equals(PickerActivity.BOOK_ONE)) {
             getMenuInflater().inflate(R.menu.trips_menu, menu);
             return true;
         }
@@ -162,5 +167,11 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
 
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //TODO selected trip?
     }
 }

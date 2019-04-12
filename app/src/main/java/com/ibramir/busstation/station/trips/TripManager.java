@@ -215,8 +215,8 @@ public class TripManager implements FirestoreActions<Trip> {
     private synchronized static Trip fromSnapshot(DocumentSnapshot d) {
         Trip.Builder b = new Trip.Builder();
         b.ofId(d.getId())
-                .from((String)d.get("source"))
-                .to((String)d.get("destination"))
+                .from(d.getString("source"))
+                .to(d.getString("destination"))
                 .ofPrice((long)d.get("price"))
                 .atTime(((Timestamp)d.get("time")).toDate())
                 .withDriver(((DocumentReference)d.get("driver")).getId());

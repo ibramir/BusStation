@@ -43,8 +43,8 @@ public class MiniBus extends Vehicle {
 
     @Override
     void initFromDocument(DocumentSnapshot d) {
-        economySeats = (int) d.get("economySeats");
-        comfortSeats = (int) d.get("comfortSeats");
+        economySeats = d.getLong("economySeats").intValue();
+        comfortSeats = d.getLong("comfortSeats").intValue();
     }
 
     @Override

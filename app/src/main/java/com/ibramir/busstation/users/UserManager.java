@@ -27,10 +27,10 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
-class UserManager implements FirestoreActions<User> {
+public class UserManager implements FirestoreActions<User> {
     private static final UserManager ourInstance = new UserManager();
 
-    static UserManager getInstance() {
+    public static UserManager getInstance() {
         return ourInstance;
     }
     private UserManager() {
@@ -116,7 +116,7 @@ class UserManager implements FirestoreActions<User> {
                 if(!d.exists())
                     return null;
                 User ret = null;
-                switch ((String)d.get("type")) {
+                switch (d.getString("type")) {
                     case "Customer": ret = getCustomer(d); break;
                     case "Manager": ret = getManager(d); break;
                     case "Driver": ret = getDriver(d); break;
@@ -130,21 +130,21 @@ class UserManager implements FirestoreActions<User> {
             return null;
         }
         private Customer getCustomer(DocumentSnapshot d) {
-            Customer ret = new Customer((String)d.get("uid"), (String)d.get("email"));
-            ret.setName((String)d.get("name"));
+            Customer ret = new Customer(d.getString("uid"), d.getString("email"));
+            ret.setName(d.getString("name"));
             for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("tickets")) {
                 TicketManager.getInstance().retrieve(tRef.getId(),ret);
             }
             return ret;
         }
         private Manager getManager(DocumentSnapshot d) {
-            Manager ret = new Manager((String)d.get("uid"), (String)d.get("email"));
-            ret.setName((String)d.get("name"));
+            Manager ret = new Manager(d.getString("uid"), d.getString("email"));
+            ret.setName(d.getString("name"));
             return ret;
         }
         private Driver getDriver(DocumentSnapshot d) {
-            Driver ret = new Driver((String)d.get("uid"), (String)d.get("email"));
-            ret.setName((String)d.get("name"));
+            Driver ret = new Driver(d.getString("uid"), d.getString("email"));
+            ret.setName(d.getString("name"));
             for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("trips"))
                 TripManager.getInstance().retrieve(tRef.getId(), ret);
             return ret;

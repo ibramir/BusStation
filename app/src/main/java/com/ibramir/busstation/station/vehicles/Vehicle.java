@@ -39,7 +39,7 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
         Vehicle ret = ofType(Type.valueOf((String)d.get("type")));
         if(ret != null) {
             ret.vehicleId = d.getId();
-            ret.availableSeats = (int) d.get("availableSeats");
+            ret.availableSeats = d.getLong("availableSeats").intValue();
             ret.initFromDocument(d);
         }
         return ret;

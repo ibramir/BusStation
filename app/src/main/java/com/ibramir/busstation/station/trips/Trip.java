@@ -42,6 +42,9 @@ public class Trip implements RetrieveListener<Vehicle> {
     public double getPrice() {
         return price;
     }
+    public double getBasePrice() {
+        return price + vehicle.getSeatPrice(null);
+    }
     public Date getTime() {
         return time;
     }
