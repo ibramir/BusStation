@@ -21,6 +21,14 @@ public class Customer extends User {
         tickets = new HashSet<>();
     }
 
+    public Collection<Ticket> getTickets() {
+        return tickets;
+    }
+
+    void setTickets(Collection<Ticket> tickets) {
+        this.tickets = tickets;
+    }
+
     public boolean reserveSeats(Trip trip1, @Nullable Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
         if(!trip1.getVehicle().availableSeats(numOfSeats, seatClass)
         || trip2 != null && !trip2.getVehicle().availableSeats(numOfSeats, seatClass)) {
@@ -40,8 +48,4 @@ public class Customer extends User {
         }
     }
 
-    @Override
-    public boolean saveInfo() {
-        return false;
-    }
 }

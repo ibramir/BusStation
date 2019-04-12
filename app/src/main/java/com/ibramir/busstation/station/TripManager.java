@@ -38,8 +38,27 @@ public class TripManager implements FirestoreActions<Trip> {
 
     final private Map<String, RetrieveListener<Trip>> listeners = new HashMap<>();
     private List<Trip> trips;
-    {
-        fetchTrips();
+
+    public List<Trip> getTrips() {
+        if(trips == null) {
+            fetchTrips();
+        }
+        return trips;
+    }
+    public Trip findTripById(String id) {
+        return getTrips().get(trips.indexOf(Trip.ofId(id)));
+    }
+    public void fetchTrips() {
+        if(trips != null)
+            return;
+        trips = new ArrayList<>();
+        try {
+            Collection<Trip> tripCollection = new RetrieveAllTask().execute().get();
+            trips.addAll(tripCollection);
+        } catch (ExecutionException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
         FirebaseFirestore.getInstance().collection("trips")
                 .addSnapshotListener(new EventListener<QuerySnapshot>() {
                     @Override
@@ -67,31 +86,10 @@ public class TripManager implements FirestoreActions<Trip> {
                 });
     }
 
-    public List<Trip> getTrips() {
-        if(trips == null) {
-            fetchTrips();
-        }
-        return trips;
-    }
-    private synchronized void fetchTrips() {
-        if(trips != null)
-            return;
-        trips = new ArrayList<>();
-        try {
-            Collection<Trip> tripCollection = new RetrieveAllTask().execute().get();
-            for(Trip t: tripCollection) {
-                if(trips.contains(t))
-                    trips.remove(t);
-                trips.add(t);
-            }
-        } catch (ExecutionException | InterruptedException e) {
-            e.printStackTrace();
-        }
-    }
-
     @Override
     public synchronized void delete(Trip obj) {
-        obj.getListenerRegistration().remove();
+        if(obj.getListenerRegistration() != null)
+            obj.getListenerRegistration().remove();
         FirebaseFirestore.getInstance().collection("trips").document(obj.getId()).delete();
     }
     @Override

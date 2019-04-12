@@ -10,8 +10,4 @@ public class Manager extends User {
         super(uid, email);
     }
 
-    @Override
-    public boolean saveInfo() {
-        return false;
-    }
 }

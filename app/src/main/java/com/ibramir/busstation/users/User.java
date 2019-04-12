@@ -1,5 +1,7 @@
 package com.ibramir.busstation.users;
 
+import com.ibramir.busstation.RetrieveListener;
+
 import javax.annotation.Nullable;
 
 public abstract class User {
@@ -21,7 +23,15 @@ public abstract class User {
     }
 
     public static void login(String uid) {
-        //TODO login
+        UserManager.getInstance().retrieve(uid, new RetrieveListener<User>() {
+            @Override
+            public void onRetrieve(User obj) {
+                currentUser = obj;
+            }
+        });
+    }
+    public static void logout(){
+        currentUser = null;
     }
 
     public String getUid() {
@@ -37,7 +47,6 @@ public abstract class User {
         this.name = name;
     }
 
-    public abstract boolean saveInfo();
 
     @Override
     public boolean equals(@Nullable Object obj) {
