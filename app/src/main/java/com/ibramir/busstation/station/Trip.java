@@ -1,7 +1,5 @@
 package com.ibramir.busstation.station;
 
-import javax.annotation.Nullable;
-
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -15,6 +13,8 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.Map;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 public class Trip {
     private ListenerRegistration listenerRegistration;
@@ -80,29 +80,41 @@ public class Trip {
         time = ((Timestamp)data.get("time")).toDate();
         driverId = (String) data.get("driverId");
         ticketIds.addAll((Collection<String>) data.get("ticketIds"));
-
     }
 
+    public boolean isFull() {
+        return vehicle.availableSeats(1, null);
+    }
+    public int getAvailableSeats() {
+        return vehicle.getAvailableSeats();
+    }
     public static void reserveSeats(Ticket ticket) {
         //TODO reservation info
     }
 
     public static Trip ofId(String id) {
-        //TODO from firebase
-        return null;
+        return new Trip(id);
     }
     private Trip() {
         this.id = UUID.randomUUID().toString();
     }
+    private Trip(String id) {
+        this.id = id;
+    }
     public static class Builder {
+        private String id = null;
         private String source;
         private String destination;
-        private float price;
+        private double price;
         private Date time;
         private Vehicle vehicle;
         private String driverId;
         private Collection<String> ticketIds = null;
 
+        public Builder ofId(String id) {
+            this.id = id;
+            return this;
+        }
         public Builder from(String source) {
             this.source = source;
             return this;
@@ -111,7 +123,7 @@ public class Trip {
             this.destination = destination;
             return this;
         }
-        public Builder ofPrice(float price) {
+        public Builder ofPrice(double price) {
             this.price = price;
             return this;
         }
@@ -131,9 +143,17 @@ public class Trip {
             this.ticketIds = customersUid;
             return this;
         }
+        public Builder withTickets(Collection<String> ticketIds) {
+            this.ticketIds = ticketIds;
+            return this;
+        }
 
         public Trip build() {
-            Trip trip = new Trip();
+            Trip trip;
+            if(id != null)
+                trip = new Trip(id);
+            else
+                trip = new Trip();
             trip.source = source;
             trip.destination = destination;
             trip.price = price;
@@ -141,7 +161,8 @@ public class Trip {
             trip.vehicle = vehicle;
             trip.driverId = driverId;
             trip.ticketIds = ticketIds;
-            TripManager.getInstance().save(trip);
+            if(id == null)
+                TripManager.getInstance().save(trip);
             return trip;
         }
     }
