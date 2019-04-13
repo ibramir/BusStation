@@ -19,27 +19,26 @@ import java.util.List;
 public class SourceSpinnerAdapter extends BaseAdapter {
 
     private Context context;
-    private List<Trip> tripList = new ArrayList<>();
+    private List<String> sourceList;
 
     SourceSpinnerAdapter(Context context) {
         this.context = context;
-        tripList.clear();
-        List<Trip> trips = TripManager.getInstance().getTrips();
-        for(Trip t: trips) {
-            if(!tripList.contains(t))
-                tripList.add(t);
+        sourceList = new ArrayList<>();
+        sourceList.add("All");
+        for(Trip t: TripManager.getInstance().getTrips()) {
+            sourceList.add(t.getSource());
         }
         notifyDataSetChanged();
     }
 
     @Override
     public int getCount() {
-        return tripList.size();
+        return sourceList.size();
     }
 
     @Override
-    public Trip getItem(int position) {
-        return tripList.get(position);
+    public String getItem(int position) {
+        return sourceList.get(position);
     }
 
     @Override
@@ -54,7 +53,7 @@ public class SourceSpinnerAdapter extends BaseAdapter {
         if(item == null)
             item = LayoutInflater.from(context).inflate(R.layout.support_simple_spinner_dropdown_item, parent, false);
         TextView textView = item.findViewById(android.R.id.text1);
-        textView.setText(tripList.get(position).getSource());
+        textView.setText(getItem(position));
         return item;
     }
 }

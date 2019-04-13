@@ -32,6 +32,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
     TripsAdapter(Context context, List<Trip> data) {
         this.context = context;
         this.data = data;
+        notifyDataSetChanged();
     }
 
     void setOnClickListener(View.OnClickListener onClickListener) {
@@ -52,14 +53,17 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
         tripHolder.sourceText.setText(t.getSource());
         tripHolder.destinationText.setText(t.getDestination());
         tripHolder.timeText.setText(formatter.format(t.getTime()));
+        if(t.getVehicle() == null)
+            return;
         if(t.isFull()) {
             tripHolder.availableText.setTextColor(ContextCompat.getColor(context,R.color.fullRed));
             tripHolder.availableText.setText("FULL");
         }
         else {
             tripHolder.availableText.setTextColor(Color.BLACK);
-            tripHolder.availableText.setText(String.valueOf((int)t.getBasePrice()));
+            tripHolder.availableText.setText(String.valueOf(t.getAvailableSeats()));
         }
+
         Vehicle v = t.getVehicle();
         if(v instanceof Bus)
             tripHolder.vehicleIcon.setImageResource(R.drawable.ic_bus_24dp);

@@ -14,6 +14,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -22,6 +23,7 @@ import com.ibramir.busstation.R;
 import com.ibramir.busstation.activities.picker.PickerActivity;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
+import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,14 +34,21 @@ import java.util.Locale;
 
 public class TripsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
 
+    public static final int RC_BOOK = 100;
+    public static final int RC_BOOK_ROUND = 101;
+
     private Date dateFilter;
+    private String sourceFilter, destinationFilter;
     private RecyclerView recyclerView;
     private TripsAdapter adapter;
     private List<Trip> filteredTrips;
-    private Trip filter;
     private String mode;
+    private Toolbar toolbar;
+    private BaseAdapter sourceAdapter, destinationAdapter;
+    private AlertDialog filterDialog;
 
     private Trip trip1, trip2;
+    private Vehicle.SeatClass seatClass1, seatClass2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,17 +56,28 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_trips);
         mode = getIntent().getAction();
 
-        Toolbar toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.app_name);
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.bookOne);
         setSupportActionBar(toolbar);
+        filteredTrips = new ArrayList<>();
+        filteredTrips.addAll(TripManager.getInstance().getTrips());
+
+        sourceAdapter = new SourceSpinnerAdapter(this);
+        destinationAdapter = new DestinationSpinnerAdapter(this);
 
         recyclerView = findViewById(R.id.tripsRecycler);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
-        filteredTrips = new ArrayList<>();
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
         recyclerView.setAdapter(adapter);
+    }
+
+    void setSourceFilter(String sourceFilter) {
+        this.sourceFilter = sourceFilter;
+    }
+    void setDestinationFilter(String destinationFilter) {
+        this.destinationFilter = destinationFilter;
     }
 
     private void openPicker(final TextView dateText) {
@@ -69,15 +89,15 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
                         c.set(year, month, dayOfMonth, 0, 0, 0);
                         dateFilter = c.getTime();
                         dateText.setText(new SimpleDateFormat("MM/dd/yyyy", Locale.ENGLISH).format(dateFilter));
-                        if(filter != null) {
-                            updateData();
-                        }
+                        updateData();
                     }
                 }, c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
         datePickerDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
             @Override
             public void onCancel(DialogInterface dialog) {
                 dateFilter = null;
+                dateText.setText("");
+                updateData();
             }
         });
         datePickerDialog.show();
@@ -85,7 +105,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(mode.equals(PickerActivity.BOOK_ONE)) {
+        if(mode.equals(PickerActivity.BOOK_ONE) || mode.equals(PickerActivity.BOOK_ROUND)) {
             getMenuInflater().inflate(R.menu.trips_menu, menu);
             return true;
         }
@@ -109,55 +129,94 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         return super.onOptionsItemSelected(item);
     }
     private void openFilter() {
+        if(filterDialog != null) {
+            filterDialog.show();
+            return;
+        }
         AlertDialog.Builder builder =new AlertDialog.Builder(this);
         builder.setTitle("Filter trips");
         builder.setCancelable(true);
-        View body =getLayoutInflater().inflate(R.layout.trips_filter, null);
 
+        View body = getLayoutInflater().inflate(R.layout.trips_filter, null);
         final TextView dateText = body.findViewById(R.id.dateText);
         dateText.setKeyListener(null);
         Spinner sourceSpinner = body.findViewById(R.id.sourceSpinner);
-        sourceSpinner.setAdapter(new SourceSpinnerAdapter(this));
         Spinner destinationSpinner = body.findViewById(R.id.destinationSpinner);
-        DestinationSpinnerAdapter destinationAdapter = new DestinationSpinnerAdapter(this, new ArrayList<Trip>());
-        destinationSpinner.setAdapter(destinationAdapter);
-        sourceSpinner.setOnItemSelectedListener(destinationAdapter);
-        destinationSpinner.setOnItemSelectedListener(this);
+        if(!(mode.equals(PickerActivity.BOOK_ROUND) && trip1 != null)) {
+            sourceSpinner.setAdapter(sourceAdapter);
+            destinationSpinner.setAdapter(destinationAdapter);
+            sourceSpinner.setOnItemSelectedListener((DestinationSpinnerAdapter) destinationAdapter);
+            destinationSpinner.setOnItemSelectedListener(this);
+        }
+        else {
+            sourceSpinner.setVisibility(View.GONE);
+            destinationSpinner.setVisibility(View.GONE);
+        }
         body.findViewById(R.id.dateText).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openPicker(dateText);
             }
         });
-        builder.setView(body).create().show();
+        filterDialog = builder.setView(body).create();
+        filterDialog.show();
     }
 
     @Override
     public void onClick(View v) {
         int pos = recyclerView.getChildAdapterPosition(v);
-        //TODO clicked trip
+        Trip clicked = filteredTrips.get(pos);
+        if(trip1 == null)
+            trip1 = clicked;
+        else
+            trip2 = clicked;
+        Intent intent = new Intent(this, ViewTripActivity.class);
+        intent.putExtra("tripId",clicked.getId());
+        startActivityForResult(intent,
+                (mode.equals(PickerActivity.BOOK_ONE)? RC_BOOK: RC_BOOK_ROUND));
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        filteredTrips.clear();
-        filter = (Trip) parent.getItemAtPosition(position);
+        destinationFilter = (String) parent.getItemAtPosition(position);
         updateData();
     }
 
-    private void updateData() {
-        if (dateFilter == null) {
-            for (Trip t : TripManager.getInstance().getTrips()) {
-                if (t.getSource().equals(filter.getSource())
-                        && t.getDestination().equals(filter.getDestination()))
+    void updateData() {
+        List<Trip> allTrips = TripManager.getInstance().getTrips();
+        filteredTrips.clear();
+        if(sourceFilter.equals("All")) {
+            if(dateFilter == null)
+                filteredTrips.addAll(allTrips);
+            else {
+                Calendar c = Calendar.getInstance();
+                c.setTime(dateFilter);
+                c.add(Calendar.DAY_OF_MONTH, 1);
+                Date date = c.getTime();
+                for(Trip t: allTrips) {
+                    Date time = t.getTime();
+                    if(time.after(dateFilter) && time.before(date) || time.equals(dateFilter))
+                        filteredTrips.add(t);
+                }
+            }
+        }
+        else if (dateFilter == null) {
+            for (Trip t : allTrips) {
+                if (t.getSource().equals(sourceFilter)
+                        && t.getDestination().equals(destinationFilter))
                     filteredTrips.add(t);
             }
         }
         else {
-            for (Trip t : TripManager.getInstance().getTrips()) {
-                if (t.getSource().equals(filter.getSource())
-                        && t.getDestination().equals(filter.getDestination())
-                        && t.getTime().after(dateFilter))
+            Calendar c = Calendar.getInstance();
+            c.setTime(dateFilter);
+            c.add(Calendar.DAY_OF_MONTH, 1);
+            Date date = c.getTime();
+            for (Trip t : allTrips) {
+                Date time = t.getTime();
+                if (t.getSource().equals(sourceFilter)
+                        && t.getDestination().equals(destinationFilter)
+                        && (time.after(dateFilter) && time.before(date) || time.equals(dateFilter)))
                     filteredTrips.add(t);
             }
         }
@@ -166,12 +225,45 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        //TODO selected trip?
+        if(requestCode == RC_BOOK || requestCode == RC_BOOK_ROUND) {
+            if(resultCode == RESULT_OK) {
+                if(requestCode == RC_BOOK) {
+                    seatClass1 = (Vehicle.SeatClass) data.getSerializableExtra("seatClass");
+                    finish();
+                    return;
+                }
+                if(trip2 == null) {
+                    seatClass1 = (Vehicle.SeatClass) data.getSerializableExtra("seatClass");
+                    toolbar.setTitle(R.string.bookTwo);
+                    sourceFilter = trip1.getDestination();
+                    destinationFilter = trip1.getSource();
+                    if(filterDialog != null) {
+                        filterDialog.findViewById(R.id.sourceSpinner).setVisibility(View.GONE);
+                        filterDialog.findViewById(R.id.destinationSpinner).setVisibility(View.GONE);
+                    }
+                    updateData();
+                }
+                else {
+                    seatClass2 = (Vehicle.SeatClass) data.getSerializableExtra("seatClass");
+                    finish();
+                }
+            }
+            else if(trip2 != null)
+                trip2 = null;
+            else {
+                trip1 = null;
+            }
+        }
+    }
+
+    @Override
+    public void finish() {
+        //TODO finish
+        super.finish();
     }
 }

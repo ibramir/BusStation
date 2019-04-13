@@ -53,4 +53,9 @@ public class MiniBus extends Vehicle {
             return 20;
         return 0;
     }
+
+    @Override
+    public boolean hasSeatClass(SeatClass seatClass) {
+        return seatClass != SeatClass.LUXURY;
+    }
 }

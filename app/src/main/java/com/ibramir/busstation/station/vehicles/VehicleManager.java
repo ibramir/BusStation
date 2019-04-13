@@ -87,7 +87,7 @@ public class VehicleManager implements FirestoreActions<Vehicle> {
                 if(!d.exists())
                     return null;
                 Vehicle ret = Vehicle.fromDocument(d);
-                TripManager.getInstance().retrieve(d.getString("assignedTrip"), ret);
+                TripManager.getInstance().retrieve(d.getDocumentReference("assignedTrip").getId(), ret);
                 return ret;
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

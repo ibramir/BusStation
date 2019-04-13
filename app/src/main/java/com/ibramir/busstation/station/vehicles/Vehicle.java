@@ -46,10 +46,15 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
     }
 
     public static Vehicle createVehicle(Type type) {
+        return createVehicle(null, type);
+    }
+    public static Vehicle createVehicle(Trip assignedTrip, Type type) {
         Vehicle ret = ofType(type);
         if(ret != null)
             ret.vehicleId = UUID.randomUUID().toString();
         VehicleManager.getInstance().save(ret);
+        if(assignedTrip != null)
+            ret.assignedTrip = assignedTrip;
         return ret;
     }
     private static Vehicle ofType(Type type) {
@@ -72,6 +77,9 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
     public Trip getAssignedTrip() {
         return assignedTrip;
     }
+    public void setAssignedTrip(Trip assignedTrip) {
+        this.assignedTrip = assignedTrip;
+    }
 
     public void reserveSeats(int numOfSeats) {
         availableSeats -= numOfSeats;
@@ -80,6 +88,7 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
     public abstract void reserveSeats(int numOfSeats, SeatClass seatClass);
 
     public abstract double getSeatPrice(@Nullable SeatClass seatClass);
+    public abstract boolean hasSeatClass(SeatClass seatClass);
     public abstract boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass);
     abstract void initFromDocument(DocumentSnapshot d);
 }

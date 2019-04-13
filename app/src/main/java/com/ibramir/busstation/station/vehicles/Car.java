@@ -28,4 +28,9 @@ public class Car extends Vehicle {
 
     @Override
     void initFromDocument(DocumentSnapshot d) { }
+
+    @Override
+    public boolean hasSeatClass(SeatClass seatClass) {
+        return seatClass == SeatClass.COMFORT;
+    }
 }

@@ -1,19 +1,13 @@
 package com.ibramir.busstation.station.trips;
 
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -61,7 +55,7 @@ public class Trip implements RetrieveListener<Vehicle> {
         return listenerRegistration;
     }
 
-    void initializeDataListener() {
+    /*void initializeDataListener() {
         DocumentReference tripReference = FirebaseFirestore.getInstance().collection("trips")
                 .document(id);
         listenerRegistration = tripReference.addSnapshotListener(new EventListener<DocumentSnapshot>() {
@@ -84,11 +78,11 @@ public class Trip implements RetrieveListener<Vehicle> {
         price = (double) data.get("price");
         time = ((Timestamp)data.get("time")).toDate();
         driverId = (String) data.get("driverId");
-        ticketIds.addAll((Collection<String>) data.get("ticketIds"));
-    }
+        ticketIds.addAll((Collection<String>) data.get("tickets"));
+    }*/
 
     public boolean isFull() {
-        return vehicle.availableSeats(1, null);
+        return !vehicle.availableSeats(1, null);
     }
     public int getAvailableSeats() {
         return vehicle.getAvailableSeats();
@@ -101,14 +95,13 @@ public class Trip implements RetrieveListener<Vehicle> {
     @Override
     public void onRetrieve(Vehicle obj) {
         vehicle = obj;
+        vehicle.setAssignedTrip(this);
     }
 
     public static Trip ofId(String id) {
         return new Trip(id);
     }
-    private Trip() {
-        this.id = UUID.randomUUID().toString();
-    }
+    private Trip() { }
     private Trip(String id) {
         this.id = id;
     }
@@ -121,6 +114,8 @@ public class Trip implements RetrieveListener<Vehicle> {
         private Vehicle vehicle;
         private String driverId;
         private Collection<String> ticketIds = null;
+
+        private boolean newID = false;
 
         public Builder ofId(String id) {
             this.id = id;
@@ -162,22 +157,28 @@ public class Trip implements RetrieveListener<Vehicle> {
             this.ticketIds = ticketIds;
             return this;
         }
+        public Builder newID(boolean newID) {
+            this.newID = newID;
+            return this;
+        }
 
         public Trip build() {
-            Trip trip;
-            if(id != null)
-                trip = new Trip(id);
-            else
-                trip = new Trip();
+            Trip trip = new Trip();
             trip.source = source;
             trip.destination = destination;
             trip.price = price;
             trip.time = time;
             trip.vehicle = vehicle;
+            if(vehicle != null)
+                vehicle.setAssignedTrip(trip);
             trip.driverId = driverId;
             trip.ticketIds = ticketIds;
-            if(id == null)
-                TripManager.getInstance().save(trip);
+            if(ticketIds == null)
+                trip.ticketIds = new ArrayList<>();
+            if(newID)
+                trip.id = UUID.randomUUID().toString();
+            else
+                trip.id = id;
             return trip;
         }
     }

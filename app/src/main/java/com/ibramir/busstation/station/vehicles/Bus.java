@@ -52,9 +52,9 @@ public class Bus extends Vehicle {
 
     @Override
     void initFromDocument(DocumentSnapshot d) {
-        economySeats = (int) d.get("economySeats");
-        comfortSeats = (int) d.get("comfortSeats");
-        luxurySeats = (int) d.get("luxurySeats");
+        economySeats = d.getLong("economySeats").intValue();
+        comfortSeats = d.getLong("comfortSeats").intValue();
+        luxurySeats = d.getLong("luxurySeats").intValue();
     }
 
     @Override
@@ -66,5 +66,10 @@ public class Bus extends Vehicle {
         if(seatClass == SeatClass.ECONOMY)
             return 10;
         return 0;
+    }
+
+    @Override
+    public boolean hasSeatClass(SeatClass seatClass) {
+        return true;
     }
 }

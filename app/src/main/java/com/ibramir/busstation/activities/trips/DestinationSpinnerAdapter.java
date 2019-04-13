@@ -1,6 +1,5 @@
 package com.ibramir.busstation.activities.trips;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
@@ -14,25 +13,28 @@ import com.ibramir.busstation.R;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DestinationSpinnerAdapter extends BaseAdapter implements AdapterView.OnItemSelectedListener {
-    private Context context;
-    private List<Trip> tripList;
+    private TripsActivity context;
+    private List<String> destinationList;
 
-    DestinationSpinnerAdapter(Context context, List<Trip> tripList) {
+    DestinationSpinnerAdapter(TripsActivity context) {
         this.context = context;
-        this.tripList = tripList;
+        this.destinationList = new ArrayList<>();
     }
 
     @Override
     public int getCount() {
-        return tripList.size();
+        return destinationList.size();
     }
 
     @Override
-    public Object getItem(int position) {
-        return tripList.get(position);
+    public String getItem(int position) {
+        if(position >= destinationList.size())
+            return null;
+        return destinationList.get(position);
     }
 
     @Override
@@ -46,24 +48,29 @@ public class DestinationSpinnerAdapter extends BaseAdapter implements AdapterVie
         View item = convertView;
         if(item == null)
             item = LayoutInflater.from(context).inflate(R.layout.support_simple_spinner_dropdown_item, parent, false);
+        if(destinationList.size() <= position)
+            return item;
         TextView textView = item.findViewById(android.R.id.text1);
-        textView.setText(tripList.get(position).getDestination());
+        textView.setText(getItem(position));
         return item;
     }
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        tripList.clear();
-        Trip filter = (Trip) parent.getItemAtPosition(position);
-        for(Trip t: TripManager.getInstance().getTrips()) {
-            if(t.getSource().equals(filter.getSource()) && !tripList.contains(t))
-                tripList.add(t);
-        }
+        destinationList.clear();
+        String filter = (String) parent.getItemAtPosition(position);
+        if(!filter.equals("All"))
+            for (Trip t : TripManager.getInstance().getTrips()) {
+                if (t.getSource().equals(filter) && !destinationList.contains(t.getDestination()))
+                    destinationList.add(t.getDestination());
+            }
+        context.setSourceFilter(filter);
         notifyDataSetChanged();
+        context.setDestinationFilter(getItem(0));
+        context.updateData();
     }
 
     @Override
     public void onNothingSelected(AdapterView<?> parent) {
-
     }
 }

@@ -4,7 +4,6 @@ import android.os.AsyncTask;
 import android.support.annotation.Nullable;
 
 import com.google.android.gms.tasks.Tasks;
-import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
@@ -105,14 +104,15 @@ public class TripManager implements FirestoreActions<Trip> {
             data.put("time", t.getTime());
             DocumentReference vehicleRef = db.collection("vehicles").document(t.getVehicle().getVehicleId());
             data.put("vehicle", vehicleRef);
-            data.put("driver", t.getDriverId());
+            DocumentReference driverRef = db.collection("users").document(t.getDriverId());
+            data.put("driver", driverRef);
             try {
                 DocumentReference tripReference = db.collection("trips").document(t.getId());
                 Tasks.await(tripReference.set(data, SetOptions.merge()), 10, TimeUnit.SECONDS);
                 Tasks.await(tripReference.update("tickets",
                         FieldValue.arrayUnion(t.getTicketIds().toArray())),
                         10,TimeUnit.SECONDS);
-                t.initializeDataListener();
+                //t.initializeDataListener();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
                 return null;
@@ -217,15 +217,15 @@ public class TripManager implements FirestoreActions<Trip> {
         b.ofId(d.getId())
                 .from(d.getString("source"))
                 .to(d.getString("destination"))
-                .ofPrice((long)d.get("price"))
-                .atTime(((Timestamp)d.get("time")).toDate())
-                .withDriver(((DocumentReference)d.get("driver")).getId());
+                .ofPrice(d.getDouble("price"))
+                .atTime(d.getTimestamp("time").toDate())
+                .withDriver((d.getDocumentReference("driver")).getId());
         Set<String> ticketIds = new HashSet<>();
         for(DocumentReference ticketRef: (ArrayList<DocumentReference>)d.get("tickets"))
             ticketIds.add(ticketRef.getId());
         b.withTickets(ticketIds);
         Trip ret = b.build();
-        VehicleManager.getInstance().retrieve(((DocumentReference)d.get("vehicle")).getId(),ret);
+        VehicleManager.getInstance().retrieve((d.getDocumentReference("vehicle")).getId(),ret);
         return ret;
     }
 }

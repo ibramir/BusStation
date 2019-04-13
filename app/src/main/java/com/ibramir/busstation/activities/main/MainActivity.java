@@ -27,6 +27,23 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        /*Trip.Builder builder = new Trip.Builder();
+        Trip trip = builder.newID(true)
+                .from("Alexandria").to("Cairo")
+                .atTime(new Date(119,5,25))
+                .withDriver("oLlp7w3iStYFHHW6EN4UuZMMkoF3")
+                .ofPrice(50)
+                .withVehicle(Vehicle.Type.BUS)
+                .build();
+        Trip trip2 = builder.newID(true)
+                .from("Cairo").to("Alexandria")
+                .atTime(new Date(119,5,27))
+                .withDriver("oLlp7w3iStYFHHW6EN4UuZMMkoF3")
+                .ofPrice(50)
+                .withVehicle(Vehicle.Type.BUS)
+                .build();
+        TripManager.getInstance().save(trip);
+        TripManager.getInstance().save(trip2);*/
         //Intent intent = new Intent(this, TripsActivity.class);
         //startActivity(intent);
         Toolbar toolbar = findViewById(R.id.loginToolbar);
@@ -36,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
         FirebaseAuth auth = FirebaseAuth.getInstance();
         FirebaseUser user = auth.getCurrentUser();
         if(user != null) {
-            User.login(user.getUid(), userType);
             loggedIn();
         }
         else {
@@ -45,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loggedIn() {
+        User.login(FirebaseAuth.getInstance().getCurrentUser().getUid(), userType);
         startActivity(new Intent(this, PickerActivity.class));
         finish();
     }
@@ -60,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                         .setAvailableProviders(Arrays.asList(
                                 new AuthUI.IdpConfig.EmailBuilder().build(),
                                 new AuthUI.IdpConfig.GoogleBuilder().build()
-                        )).build(),
+                        )).setIsSmartLockEnabled(false).build(),
                 RC_SIGN_IN
         );
     }
@@ -68,9 +85,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_SIGN_IN && resultCode == RESULT_OK) {
-            User.login(FirebaseAuth.getInstance().getCurrentUser().getUid(), userType);
-            loggedIn();
+        if(requestCode == RC_SIGN_IN ) {
+            if(FirebaseAuth.getInstance().getCurrentUser() != null)
+                loggedIn();
         }
     }
 }
