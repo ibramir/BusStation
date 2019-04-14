@@ -23,7 +23,10 @@ import com.ibramir.busstation.R;
 import com.ibramir.busstation.activities.picker.PickerActivity;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
+import com.ibramir.busstation.station.trips.TripsListener;
 import com.ibramir.busstation.station.vehicles.Vehicle;
+import com.ibramir.busstation.users.Customer;
+import com.ibramir.busstation.users.User;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -46,6 +49,13 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     private Toolbar toolbar;
     private BaseAdapter sourceAdapter, destinationAdapter;
     private AlertDialog filterDialog;
+    private TripsListener changeListener = new TripsListener() {
+        @Override
+        public void onTripsChanged() {
+            findViewById(R.id.progressFrame).setVisibility(View.GONE);
+            initialize();
+        }
+    };
 
     private Trip trip1, trip2;
     private Vehicle.SeatClass seatClass1, seatClass2;
@@ -56,6 +66,10 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_trips);
         mode = getIntent().getAction();
 
+        TripManager.getInstance().fetchTrips(changeListener);
+    }
+
+    private void initialize() {
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.bookOne);
         setSupportActionBar(toolbar);
@@ -71,6 +85,13 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
         recyclerView.setAdapter(adapter);
+
+        changeListener = new TripsListener() {
+            @Override
+            public void onTripsChanged() {
+                adapter.notifyDataSetChanged();
+            }
+        };
     }
 
     void setSourceFilter(String sourceFilter) {
@@ -263,7 +284,10 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void finish() {
-        //TODO finish
+        if(User.getCurrentUser() instanceof Customer) {
+            Customer customer = (Customer) User.getCurrentUser();
+            customer.reserveTicket(trip1, seatClass1, trip2, seatClass2, 1);
+        }
         super.finish();
     }
 }

@@ -13,6 +13,7 @@ import com.google.firebase.auth.FirebaseUser;
 import com.ibramir.busstation.R;
 import com.ibramir.busstation.activities.picker.PickerActivity;
 import com.ibramir.busstation.station.trips.TripManager;
+import com.ibramir.busstation.users.LoginListener;
 import com.ibramir.busstation.users.User;
 
 import java.util.Arrays;
@@ -22,6 +23,14 @@ public class MainActivity extends AppCompatActivity {
     public static final int RC_SIGN_IN = 1;
 
     private User.Type userType = User.Type.CUSTOMER;
+
+    private LoginListener loginListener = new LoginListener() {
+        @Override
+        public void onLogin() {
+            startActivity(new Intent(MainActivity.this, PickerActivity.class));
+            finish();
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +70,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loggedIn() {
-        User.login(FirebaseAuth.getInstance().getCurrentUser().getUid(), userType);
-        startActivity(new Intent(this, PickerActivity.class));
-        finish();
+        findViewById(R.id.progressFrame).setVisibility(View.VISIBLE);
+        User.login(FirebaseAuth.getInstance().getCurrentUser().getUid(), userType, loginListener);
     }
+
 
     public void login(View v) {
         switch (v.getId()) {

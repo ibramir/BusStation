@@ -17,33 +17,30 @@ public class Ticket implements RetrieveListener<Trip> {
 
     private String ticketId;
     private String uid;
-    private Trip trip1;
-    private Trip trip2;
+    private Trip trip1, trip2;
     private int numOfSeats;
     private double price;
-    private Vehicle.SeatClass seatClass;
+    private Vehicle.SeatClass seatClass, seatClass2;
 
-    public static Ticket reserveTicket(Customer customer, Trip trip,
-                                       int numOfSeats, Vehicle.SeatClass seatClass) {
-        return reserveTicket(customer, trip, null, numOfSeats, seatClass);
-    }
-    public static Ticket reserveTicket(Customer customer, Trip trip1, @Nullable Trip trip2,
-                                       int numOfSeats, Vehicle.SeatClass seatClass) {
-        Ticket t = new Ticket(customer.getUid(), trip1, trip2, numOfSeats, seatClass);
-        trip1.reserveSeats(t);
+    public static Ticket reserveTicket(Customer customer, Trip trip1, Vehicle.SeatClass seatClass, @Nullable Trip trip2,
+                                       @Nullable Vehicle.SeatClass seatClass2, int numOfSeats) {
+        Ticket t = new Ticket(customer.getUid(), trip1, seatClass, trip2, seatClass2, numOfSeats);
+        trip1.reserveSeats(t, seatClass);
         if(trip2 != null)
-            trip2.reserveSeats(t);
+            trip2.reserveSeats(t, seatClass2);
         t.ticketId = UUID.randomUUID().toString();
         TicketManager.getInstance().save(t);
         return t;
     }
 
-    private Ticket(String uid, Trip trip1, Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
+    private Ticket(String uid, Trip trip1, Vehicle.SeatClass seatClass, Trip trip2, Vehicle.SeatClass seatClass2,
+                   int numOfSeats) {
         this.uid = uid;
         this.trip1 = trip1;
         this.trip2 = trip2;
         this.numOfSeats = numOfSeats;
         this.seatClass = seatClass;
+        this.seatClass2 = seatClass2;
         this.price = calculatePrice();
     }
 
@@ -60,10 +57,10 @@ public class Ticket implements RetrieveListener<Trip> {
         double t2 = 0;
         if(trip2 != null) {
             rate = ROUND_RATE;
-            t2 = trip2.getPrice() + trip2.getVehicle().getSeatPrice(seatClass);
+            t2 = trip2.getPrice() + trip2.getVehicle().getSeatPrice(seatClass2);
         }
         double t1 = trip1.getPrice() + trip1.getVehicle().getSeatPrice(seatClass);
-        return rate*(t1 + t2);
+        return numOfSeats*rate*(t1 + t2);
     }
 
     public void cancelTicket() {
@@ -76,7 +73,7 @@ public class Ticket implements RetrieveListener<Trip> {
     public String getUid() {
         return uid;
     }
-    public Trip getTrip1() {
+    public Trip getTrip() {
         return trip1;
     }
     public Trip getTrip2() {
@@ -90,6 +87,9 @@ public class Ticket implements RetrieveListener<Trip> {
     }
     public Vehicle.SeatClass getSeatClass() {
         return seatClass;
+    }
+    public Vehicle.SeatClass getSeatClass2() {
+        return seatClass2;
     }
 
     @Override

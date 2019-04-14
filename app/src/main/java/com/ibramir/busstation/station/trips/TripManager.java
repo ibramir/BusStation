@@ -37,6 +37,7 @@ public class TripManager implements FirestoreActions<Trip> {
         return ourInstance;
     }
     private TripManager() { }
+    private List<TripsListener> changeListeners = new ArrayList<>();
 
     final private Map<String, RetrieveListener<Trip>> listeners = new HashMap<>();
     private List<Trip> trips;
@@ -50,11 +51,20 @@ public class TripManager implements FirestoreActions<Trip> {
     public Trip findTripById(String id) {
         return getTrips().get(trips.indexOf(Trip.ofId(id)));
     }
-    public void fetchTrips() {
-        if(trips != null)
-            return;
-        trips = new ArrayList<>();
-        new RetrieveAllTask().execute();
+    public synchronized void fetchTrips() {
+        if(trips == null) {
+            trips = new ArrayList<>();
+            new RetrieveAllTask().execute();
+        }
+    }
+    public synchronized void fetchTrips(TripsListener listener) {
+        addChangeListener(listener);
+        if(trips == null) {
+            trips = new ArrayList<>();
+            new RetrieveAllTask().execute();
+        }
+        else
+            listener.onTripsChanged();
     }
 
     @Override
@@ -187,13 +197,12 @@ public class TripManager implements FirestoreActions<Trip> {
                                 return;
                             synchronized (trips) {
                                 for (DocumentChange documentChange : queryDocumentSnapshots.getDocumentChanges()) {
-                                    Trip trip = fromSnapshot(documentChange.getDocument());
                                     if (documentChange.getType() == DocumentChange.Type.ADDED) {
                                         int i;
-                                        if((i=trips.indexOf(trip)) != -1)
-                                            trips.set(i, trip);
+                                        if((i=trips.indexOf(Trip.ofId(documentChange.getDocument().getId()))) != -1)
+                                            trips.get(i).updateData(documentChange.getDocument().getData());
                                         else
-                                            trips.add(trip);
+                                            trips.add(fromSnapshot(documentChange.getDocument()));
                                     }
                                     else {
                                         String tripId = documentChange.getDocument().getId();
@@ -202,14 +211,24 @@ public class TripManager implements FirestoreActions<Trip> {
                                             trips.remove(Trip.ofId(tripId));
                                         }
                                         else if (documentChange.getType() == DocumentChange.Type.MODIFIED)
-                                            trips.set(trips.indexOf(Trip.ofId(tripId)),
-                                                    trip);
+                                            trips.get(trips.indexOf(Trip.ofId(tripId)))
+                                                    .updateData(documentChange.getDocument().getData());
                                     }
                                 }
                             }
                         }
                     });
+            TripManager.getInstance().notifyListeners();
         }
+    }
+
+    public synchronized void addChangeListener(TripsListener listener) {
+        if(listener != null)
+            changeListeners.add(listener);
+    }
+    synchronized void notifyListeners() {
+        for(TripsListener listener: changeListeners)
+            listener.onTripsChanged();
     }
 
     private synchronized static Trip fromSnapshot(DocumentSnapshot d) {

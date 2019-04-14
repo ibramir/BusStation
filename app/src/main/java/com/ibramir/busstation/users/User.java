@@ -47,7 +47,7 @@ public abstract class User {
         this.name = name;
     }
 
-    private static void register(FirebaseUser user, Type type) {
+    private static void register(FirebaseUser user, Type type, LoginListener listener) {
         switch (type) {
             case CUSTOMER:
                 currentUser = new Customer(user.getUid(), user.getEmail());
@@ -61,17 +61,25 @@ public abstract class User {
         }
         currentUser.setName(user.getDisplayName());
         UserManager.getInstance().save(currentUser);
+        if(listener != null)
+            listener.onLogin();
     }
-    public static void login(String uid, final Type type) {
+    public static void login(String uid, final Type type, final LoginListener listener) {
         UserManager.getInstance().retrieve(uid, new RetrieveListener<User>() {
             @Override
             public void onRetrieve(User obj) {
                 if(obj == null)
-                    register(FirebaseAuth.getInstance().getCurrentUser(),type);
-                else
+                    register(FirebaseAuth.getInstance().getCurrentUser(),type, listener);
+                else {
                     currentUser = obj;
+                    if(listener != null)
+                        listener.onLogin();
+                }
             }
         });
+    }
+    public static void login(String uid, final Type type) {
+        login(uid, type, null);
     }
     public static void logout(){
         currentUser = null;

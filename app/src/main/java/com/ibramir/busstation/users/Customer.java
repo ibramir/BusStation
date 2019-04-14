@@ -37,12 +37,13 @@ public class Customer extends User implements RetrieveListener<Ticket> {
         this.tickets = tickets;
     }
 
-    public boolean reserveTicket(Trip trip1, @Nullable Trip trip2, int numOfSeats, Vehicle.SeatClass seatClass) {
+    public boolean reserveTicket(Trip trip1, Vehicle.SeatClass seatClass, @Nullable Trip trip2, @Nullable Vehicle.SeatClass seatClass2,
+                                 int numOfSeats) {
         if(!trip1.getVehicle().availableSeats(numOfSeats, seatClass)
         || trip2 != null && !trip2.getVehicle().availableSeats(numOfSeats, seatClass)) {
             return false;
         }
-        Ticket ticket = Ticket.reserveTicket(this, trip1, trip2, numOfSeats, seatClass);
+        Ticket ticket = Ticket.reserveTicket(this, trip1, seatClass, trip2, seatClass2, numOfSeats);
         tickets.add(ticket);
         return true;
     }

@@ -42,7 +42,7 @@ public class TicketManager implements FirestoreActions<Ticket> {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             Map<String, Object> data = new HashMap<>();
             data.put("uid", t.getUid());
-            data.put("trip1", db.collection("trips").document(t.getTrip1().getId()));
+            data.put("trip1", db.collection("trips").document(t.getTrip().getId()));
             data.put("trip2", db.collection("trips").document(t.getTrip2().getId()));
             data.put("numOfSeats", t.getNumOfSeats());
             data.put("price", t.getPrice());

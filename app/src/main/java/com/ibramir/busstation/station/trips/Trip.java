@@ -1,5 +1,7 @@
 package com.ibramir.busstation.station.trips;
 
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
@@ -8,6 +10,7 @@ import com.ibramir.busstation.station.vehicles.Vehicle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -71,15 +74,15 @@ public class Trip implements RetrieveListener<Vehicle> {
                 updateData(documentSnapshot.getData());
             }
         });
-    }
-    private void updateData(Map<String, Object> data) {
+    }*/
+    void updateData(Map<String, Object> data) {
         source = (String) data.get("source");
         destination = (String) data.get("destination");
         price = (double) data.get("price");
         time = ((Timestamp)data.get("time")).toDate();
-        driverId = (String) data.get("driverId");
+        driverId = ((DocumentReference)data.get("driver")).getId();
         ticketIds.addAll((Collection<String>) data.get("tickets"));
-    }*/
+    }
 
     public boolean isFull() {
         return !vehicle.availableSeats(1, null);
@@ -87,8 +90,8 @@ public class Trip implements RetrieveListener<Vehicle> {
     public int getAvailableSeats() {
         return vehicle.getAvailableSeats();
     }
-    public void reserveSeats(Ticket ticket) {
-        vehicle.reserveSeats(ticket.getNumOfSeats(), ticket.getSeatClass());
+    public void reserveSeats(Ticket ticket, Vehicle.SeatClass seatClass) {
+        vehicle.reserveSeats(ticket.getNumOfSeats(), seatClass);
 
     }
 
@@ -96,6 +99,7 @@ public class Trip implements RetrieveListener<Vehicle> {
     public void onRetrieve(Vehicle obj) {
         vehicle = obj;
         vehicle.setAssignedTrip(this);
+        TripManager.getInstance().notifyListeners();
     }
 
     public static Trip ofId(String id) {
