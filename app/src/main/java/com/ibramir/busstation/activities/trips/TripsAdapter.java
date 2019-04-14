@@ -27,7 +27,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
     private Context context;
     private View.OnClickListener onClickListener;
     private List<Trip> data;
-    private SimpleDateFormat formatter = new SimpleDateFormat("dd/MM\nHH:mm", Locale.ENGLISH);
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM\nHH:mm", Locale.ENGLISH);
 
     TripsAdapter(Context context, List<Trip> data) {
         this.context = context;
@@ -49,35 +49,14 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
     }
     @Override
     public void onBindViewHolder(@NonNull TripHolder tripHolder, int i) {
-        Trip t = data.get(i);
-        tripHolder.sourceText.setText(t.getSource());
-        tripHolder.destinationText.setText(t.getDestination());
-        tripHolder.timeText.setText(formatter.format(t.getTime()));
-        if(t.getVehicle() == null)
-            return;
-        if(t.isFull()) {
-            tripHolder.availableText.setTextColor(ContextCompat.getColor(context,R.color.fullRed));
-            tripHolder.availableText.setText("FULL");
-        }
-        else {
-            tripHolder.availableText.setTextColor(Color.BLACK);
-            tripHolder.availableText.setText(String.valueOf(t.getAvailableSeats()));
-        }
-
-        Vehicle v = t.getVehicle();
-        if(v instanceof Bus)
-            tripHolder.vehicleIcon.setImageResource(R.drawable.ic_bus_24dp);
-        else if(v instanceof MiniBus)
-            tripHolder.vehicleIcon.setImageResource(R.drawable.ic_minibus_24dp);
-        else if(v instanceof Car)
-            tripHolder.vehicleIcon.setImageResource(R.drawable.ic_car_24dp);
+        tripHolder.updateData(data.get(i));
     }
     @Override
     public int getItemCount() {
         return data.size();
     }
 
-    static class TripHolder extends RecyclerView.ViewHolder {
+    class TripHolder extends RecyclerView.ViewHolder {
         private TextView sourceText, destinationText, timeText, availableText;
         private ImageView vehicleIcon;
         TripHolder(@NonNull View itemView) {
@@ -87,6 +66,30 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
             this.timeText = itemView.findViewById(R.id.timeText);
             this.availableText = itemView.findViewById(R.id.availableText);
             this.vehicleIcon = itemView.findViewById(R.id.vIcon);
+        }
+
+        private void updateData(Trip t) {
+            sourceText.setText(t.getSource());
+            destinationText.setText(t.getDestination());
+            timeText.setText(DATE_FORMAT.format(t.getTime()));
+            if(t.getVehicle() == null)
+                return;
+            if(t.isFull()) {
+                availableText.setTextColor(ContextCompat.getColor(context,R.color.fullRed));
+                availableText.setText("FULL");
+            }
+            else {
+                availableText.setTextColor(Color.BLACK);
+                availableText.setText(String.valueOf(t.getAvailableSeats()));
+            }
+
+            Vehicle v = t.getVehicle();
+            if(v instanceof Bus)
+                vehicleIcon.setImageResource(R.drawable.ic_bus_24dp);
+            else if(v instanceof MiniBus)
+                vehicleIcon.setImageResource(R.drawable.ic_minibus_24dp);
+            else if(v instanceof Car)
+                vehicleIcon.setImageResource(R.drawable.ic_car_24dp);
         }
     }
 

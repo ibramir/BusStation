@@ -2,7 +2,6 @@ package com.ibramir.busstation.station.trips;
 
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
@@ -16,8 +15,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 public class Trip implements RetrieveListener<Vehicle> {
-    private ListenerRegistration listenerRegistration;
-
     private String id;
     private String source;
     private String destination;
@@ -54,9 +51,6 @@ public class Trip implements RetrieveListener<Vehicle> {
     public Collection<String> getTicketIds() {
         return ticketIds;
     }
-    public ListenerRegistration getListenerRegistration() {
-        return listenerRegistration;
-    }
 
     /*void initializeDataListener() {
         DocumentReference tripReference = FirebaseFirestore.getInstance().collection("trips")
@@ -83,6 +77,10 @@ public class Trip implements RetrieveListener<Vehicle> {
         driverId = ((DocumentReference)data.get("driver")).getId();
         ticketIds.addAll((Collection<String>) data.get("tickets"));
     }
+    public void deleteTrip() {
+        vehicle.deleteVehicle();
+        TripManager.getInstance().delete(this);
+    }
 
     public boolean isFull() {
         return !vehicle.availableSeats(1, null);
@@ -92,7 +90,9 @@ public class Trip implements RetrieveListener<Vehicle> {
     }
     public void reserveSeats(Ticket ticket, Vehicle.SeatClass seatClass) {
         vehicle.reserveSeats(ticket.getNumOfSeats(), seatClass);
-
+    }
+    public void cancelReservation(int numOfSeats, Vehicle.SeatClass seatClass) {
+        vehicle.cancelReservation(numOfSeats, seatClass);
     }
 
     @Override

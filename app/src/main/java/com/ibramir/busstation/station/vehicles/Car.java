@@ -15,6 +15,10 @@ public class Car extends Vehicle {
     public void reserveSeats(int numOfSeats, SeatClass seatClass) {
         super.reserveSeats(numOfSeats);
     }
+    @Override
+    public void cancelReservation(int numOfSeats, SeatClass seatClass) {
+        super.cancelReservation(numOfSeats);
+    }
 
     @Override
     public double getSeatPrice(@Nullable SeatClass seatClass) {

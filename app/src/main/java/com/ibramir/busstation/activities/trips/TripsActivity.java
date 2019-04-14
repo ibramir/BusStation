@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -72,6 +73,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     private void initialize() {
         toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.bookOne);
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
         filteredTrips = new ArrayList<>();
         filteredTrips.addAll(TripManager.getInstance().getTrips());

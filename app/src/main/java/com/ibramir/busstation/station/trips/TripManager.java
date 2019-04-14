@@ -69,8 +69,6 @@ public class TripManager implements FirestoreActions<Trip> {
 
     @Override
     public synchronized void delete(Trip obj) {
-        if(obj.getListenerRegistration() != null)
-            obj.getListenerRegistration().remove();
         deleteTickets(obj.getId());
         trips.remove(obj);
         FirebaseFirestore.getInstance().collection("trips").document(obj.getId()).delete();

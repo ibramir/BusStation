@@ -10,21 +10,22 @@ import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
+import java.util.List;
 
 import javax.annotation.Nullable;
 
 public class Customer extends User implements RetrieveListener<Ticket> {
 
-    private Collection<Ticket> tickets;
+    private List<Ticket> tickets;
 
     Customer(String uid) {
         this(uid, null);
     }
     Customer(String uid, String email) {
         super(uid, email);
-        tickets = new HashSet<>();
+        tickets = new ArrayList<>();
     }
     Customer(String uid, String email, String name) {
         super(uid, email, name);
@@ -33,7 +34,7 @@ public class Customer extends User implements RetrieveListener<Ticket> {
         return tickets;
     }
 
-    void setTickets(Collection<Ticket> tickets) {
+    void setTickets(List<Ticket> tickets) {
         this.tickets = tickets;
     }
 
@@ -50,7 +51,7 @@ public class Customer extends User implements RetrieveListener<Ticket> {
     public void cancelReservation(String ticketId) {
         for(Ticket t: tickets) {
             if(t.equals(ticketId)) {
-                t.cancelTicket();
+                t.revokeTicket();
                 tickets.remove(t);
                 return;
             }
@@ -59,6 +60,8 @@ public class Customer extends User implements RetrieveListener<Ticket> {
 
     @Override
     public synchronized void onRetrieve(Ticket obj) {
+        if(tickets.contains(obj))
+            return;
         tickets.add(obj);
         FirebaseFirestore db = FirebaseFirestore.getInstance();
         TicketListener listener = new TicketListener(obj);

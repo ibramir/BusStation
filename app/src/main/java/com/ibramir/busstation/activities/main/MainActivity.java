@@ -1,6 +1,7 @@
 package com.ibramir.busstation.activities.main;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -56,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
         //Intent intent = new Intent(this, TripsActivity.class);
         //startActivity(intent);
         Toolbar toolbar = findViewById(R.id.loginToolbar);
+        toolbar.setTitleTextColor(Color.WHITE);
         TripManager.getInstance().fetchTrips();
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);

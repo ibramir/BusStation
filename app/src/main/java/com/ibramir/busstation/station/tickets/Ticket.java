@@ -1,6 +1,5 @@
 package com.ibramir.busstation.station.tickets;
 
-import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.vehicles.Vehicle;
@@ -12,8 +11,6 @@ import javax.annotation.Nullable;
 
 public class Ticket implements RetrieveListener<Trip> {
     private static final double ROUND_RATE = 0.9;
-
-    private ListenerRegistration listenerRegistration;
 
     private String ticketId;
     private String uid;
@@ -63,7 +60,10 @@ public class Ticket implements RetrieveListener<Trip> {
         return numOfSeats*rate*(t1 + t2);
     }
 
-    public void cancelTicket() {
+    public void revokeTicket() {
+        trip1.cancelReservation(numOfSeats, seatClass);
+        if(trip2 != null)
+            trip2.cancelReservation(numOfSeats, seatClass2);
         TicketManager.getInstance().delete(this);
     }
 

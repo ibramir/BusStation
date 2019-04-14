@@ -44,6 +44,9 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
         }
         return ret;
     }
+    public void deleteVehicle() {
+        VehicleManager.getInstance().delete(this);
+    }
 
     public static Vehicle createVehicle(Type type) {
         return createVehicle(null, type);
@@ -85,7 +88,12 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
         availableSeats -= numOfSeats;
         VehicleManager.getInstance().save(this);
     }
+    protected void cancelReservation(int numOfSeats) {
+        availableSeats += numOfSeats;
+        VehicleManager.getInstance().save(this);
+    }
     public abstract void reserveSeats(int numOfSeats, SeatClass seatClass);
+    public abstract void cancelReservation(int numOfSeats, SeatClass seatClass);
 
     public abstract double getSeatPrice(@Nullable SeatClass seatClass);
     public abstract boolean hasSeatClass(SeatClass seatClass);

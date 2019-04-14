@@ -24,12 +24,21 @@ public class MiniBus extends Vehicle {
 
     @Override
     public void reserveSeats(int numOfSeats, SeatClass seatClass) {
-        if(seatClass == SeatClass.ECONOMY)
-            economySeats -= numOfSeats;
-        else if(seatClass == SeatClass.COMFORT)
-            comfortSeats -= numOfSeats;
+        switch (seatClass) {
+            case ECONOMY: economySeats -= numOfSeats; break;
+            case COMFORT: comfortSeats -= numOfSeats; break;
+        }
         super.reserveSeats(numOfSeats);
     }
+    @Override
+    public void cancelReservation(int numOfSeats, SeatClass seatClass) {
+        switch (seatClass) {
+            case ECONOMY: economySeats += numOfSeats; break;
+            case COMFORT: comfortSeats += numOfSeats; break;
+        }
+        super.cancelReservation(numOfSeats);
+    }
+
     @Override
     public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
         if(seatClass == null)
