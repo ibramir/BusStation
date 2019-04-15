@@ -3,6 +3,7 @@ package com.ibramir.busstation.station.tickets;
 import android.os.AsyncTask;
 
 import com.google.android.gms.tasks.Tasks;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.ibramir.busstation.FirestoreActions;
@@ -78,12 +79,15 @@ public class TicketManager implements FirestoreActions<Ticket> {
                         d.getLong("numOfSeats").intValue(), d.getDouble("price"),
                         Vehicle.SeatClass.valueOf(d.getString("seatClass")));
                 TripManager tripManager = TripManager.getInstance();
-                String trip1Id = d.getString("trip1");
+                String trip1Id = d.getDocumentReference("trip1").getId();
                 ret.setTrip1Id(trip1Id);
                 tripManager.retrieve(trip1Id, ret);
-                String trip2Id = d.getString("trip2");
-                ret.setTrip2Id(trip2Id);
-                tripManager.retrieve(trip2Id, ret);
+                DocumentReference trip2Ref = d.getDocumentReference("trip2");
+                if(trip2Ref != null) {
+                    String trip2Id = trip2Ref.getId();
+                    ret.setTrip2Id(trip2Id);
+                    tripManager.retrieve(trip2Id, ret);
+                }
                 return ret;
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();

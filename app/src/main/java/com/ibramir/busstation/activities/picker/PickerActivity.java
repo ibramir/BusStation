@@ -1,8 +1,10 @@
 package com.ibramir.busstation.activities.picker;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 
 import com.ibramir.busstation.R;
@@ -23,6 +25,12 @@ public class PickerActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_picker);
+
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.home);
+        toolbar.setTitleTextColor(Color.WHITE);
+        setSupportActionBar(toolbar);
+
         User user = User.getCurrentUser();
         View manageButton = findViewById(R.id.manageButton);
         View bookButton = findViewById(R.id.bookOneButton);
@@ -54,5 +62,7 @@ public class PickerActivity extends AppCompatActivity {
     public void myTrips(View v) {
         if(User.getCurrentUser() instanceof Customer)
             startActivity(new Intent(this, TicketsActivity.class));
+        else if(User.getCurrentUser() instanceof Driver)
+            startActivity(new Intent(this, TripsActivity.class));
     }
 }

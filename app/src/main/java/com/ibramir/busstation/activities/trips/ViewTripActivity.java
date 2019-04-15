@@ -39,6 +39,8 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
         toolbar.setTitle(R.string.bookOne);
         toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         trip = TripManager.getInstance().findTripById(getIntent().getStringExtra("tripId"));
         TextView sourceText = findViewById(R.id.sourceText), destinationText = findViewById(R.id.destinationText),
@@ -130,6 +132,12 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
         }
         setResult(result, data);
         super.finish();
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override

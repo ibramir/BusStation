@@ -114,11 +114,17 @@ public class TripManager implements FirestoreActions<Trip> {
             data.put("vehicle", vehicleRef);
             DocumentReference driverRef = db.collection("users").document(t.getDriverId());
             data.put("driver", driverRef);
+            List<DocumentReference> ticketRefs = new ArrayList<>();
+            CollectionReference ticketsRef = db.collection("tickets");
+            for(String ticketId: t.getTicketIds()) {
+                ticketRefs.add(ticketsRef.document(ticketId));
+            }
             try {
                 DocumentReference tripReference = db.collection("trips").document(t.getId());
                 Tasks.await(tripReference.set(data, SetOptions.merge()), 10, TimeUnit.SECONDS);
-                Tasks.await(tripReference.update("tickets",
-                        FieldValue.arrayUnion(t.getTicketIds().toArray())),
+                if(ticketRefs.size() > 0)
+                    Tasks.await(tripReference.update("tickets",
+                        FieldValue.arrayUnion(ticketRefs.toArray())),
                         10,TimeUnit.SECONDS);
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
@@ -238,8 +244,9 @@ public class TripManager implements FirestoreActions<Trip> {
                 .atTime(d.getTimestamp("time").toDate())
                 .withDriver((d.getDocumentReference("driver")).getId());
         Set<String> ticketIds = new HashSet<>();
-        for(DocumentReference ticketRef: (ArrayList<DocumentReference>)d.get("tickets"))
+        for(DocumentReference ticketRef: (List<DocumentReference>)d.get("tickets")) {
             ticketIds.add(ticketRef.getId());
+        }
         b.withTickets(ticketIds);
         Trip ret = b.build();
         VehicleManager.getInstance().retrieve((d.getDocumentReference("vehicle")).getId(),ret);

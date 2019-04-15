@@ -6,9 +6,9 @@ import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.UUID;
 
@@ -184,7 +184,7 @@ public class Trip implements RetrieveListener<Vehicle> {
             trip.driverId = driverId;
             trip.ticketIds = ticketIds;
             if(ticketIds == null)
-                trip.ticketIds = new ArrayList<>();
+                trip.ticketIds = new HashSet<>();
             if(newID)
                 trip.id = UUID.randomUUID().toString();
             else
