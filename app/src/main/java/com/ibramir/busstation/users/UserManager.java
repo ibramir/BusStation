@@ -116,8 +116,10 @@ public class UserManager implements FirestoreActions<User> {
         new RetrieveTask().execute(id);
     }
     private static class RetrieveTask extends AsyncTask<String,Void,User> {
+        private String uid;
         @Override
         protected User doInBackground(String... strings) {
+            uid = strings[0];
             try {
                 DocumentSnapshot d = Tasks.await(
                         FirebaseFirestore.getInstance().collection("users").document(strings[0]).get(),
@@ -140,8 +142,7 @@ public class UserManager implements FirestoreActions<User> {
         }
         @Override
         protected void onPostExecute(User user) {
-            super.onPostExecute(user);
-            RetrieveListener<User> userRetrieveListener = getInstance().retrieveListeners.get(user.getUid());
+            RetrieveListener<User> userRetrieveListener = getInstance().retrieveListeners.get(uid);
             if(userRetrieveListener != null)
                 userRetrieveListener.onRetrieve(user);
         }

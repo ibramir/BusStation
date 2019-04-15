@@ -3,11 +3,16 @@ package com.ibramir.busstation.activities.picker;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 
+import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.ibramir.busstation.R;
+import com.ibramir.busstation.activities.main.MainActivity;
 import com.ibramir.busstation.activities.tickets.TicketsActivity;
 import com.ibramir.busstation.activities.trips.TripsActivity;
 import com.ibramir.busstation.users.Customer;
@@ -64,5 +69,16 @@ public class PickerActivity extends AppCompatActivity {
             startActivity(new Intent(this, TicketsActivity.class));
         else if(User.getCurrentUser() instanceof Driver)
             startActivity(new Intent(this, TripsActivity.class));
+    }
+    public void signOut(View v) {
+        findViewById(R.id.progressFrame).setVisibility(View.VISIBLE);
+        AuthUI.getInstance().signOut(this).addOnCompleteListener(new OnCompleteListener<Void>() {
+            @Override
+            public void onComplete(@NonNull Task<Void> task) {
+                User.logout();
+                startActivity(new Intent(PickerActivity.this, MainActivity.class));
+                finish();
+            }
+        });
     }
 }

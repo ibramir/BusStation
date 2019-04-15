@@ -9,6 +9,7 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -70,9 +71,13 @@ public class TripManager implements FirestoreActions<Trip> {
     }
 
     @Override
-    public synchronized void delete(Trip obj) {
-        deleteTickets(obj.getId());
-        FirebaseFirestore.getInstance().collection("trips").document(obj.getId()).delete();
+    public synchronized void delete(Trip trip) {
+        deleteTickets(trip.getId());
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+        DocumentReference tripRef = db.collection("trips").document(trip.getId());
+        tripRef.delete();
+        db.collection("users").document(trip.getDriverId())
+                .update("trips",FieldValue.arrayRemove(tripRef));
     }
     private void deleteTickets(String tripId) {
         FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -124,6 +129,8 @@ public class TripManager implements FirestoreActions<Trip> {
             try {
                 DocumentReference tripReference = db.collection("trips").document(t.getId());
                 Tasks.await(tripReference.set(data, SetOptions.merge()), 10, TimeUnit.SECONDS);
+                Tasks.await(driverRef.update("trips", FieldValue.arrayUnion(tripReference)),
+                        10, TimeUnit.SECONDS);
                 /*if(ticketRefs.size() > 0)
                     Tasks.await(tripReference.update("tickets",
                         FieldValue.arrayUnion(ticketRefs.toArray())),

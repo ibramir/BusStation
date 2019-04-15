@@ -97,6 +97,7 @@ public class TripsActivity extends AppCompatActivity
         allTrips = driver.getAssignedTrips();
         filteredTrips = new ArrayList<>();
         adapter = new TripsAdapter(this, filteredTrips);
+        recyclerView.setAdapter(adapter);
         updateData();
     }
     private void initialize() {

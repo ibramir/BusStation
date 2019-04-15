@@ -43,6 +43,8 @@ public class Driver extends User implements RetrieveListener<Trip>, OnTripsChang
         for(Trip t: assignedCopy) {
             if(!trips.contains(t))
                 assignedTrips.remove(t);
+            if(t.getDriverId().equals(getUid()))
+                assignedTrips.add(t);
         }
     }
 }

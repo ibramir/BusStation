@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Toast;
 
 import com.firebase.ui.auth.AuthUI;
 import com.google.firebase.auth.FirebaseAuth;
@@ -28,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
     private LoginListener loginListener = new LoginListener() {
         @Override
         public void onLogin() {
+            if(User.getCurrentUser() == null) {
+                findViewById(R.id.progressFrame).setVisibility(View.GONE);
+                Toast.makeText(MainActivity.this, "Login failed", Toast.LENGTH_LONG).show();
+                return;
+            }
             startActivity(new Intent(MainActivity.this, PickerActivity.class));
             finish();
         }
