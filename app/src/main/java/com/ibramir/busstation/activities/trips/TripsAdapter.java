@@ -27,7 +27,7 @@ public class TripsAdapter extends RecyclerView.Adapter<TripsAdapter.TripHolder> 
     private Context context;
     private View.OnClickListener onClickListener;
     private List<Trip> data;
-    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM\nHH:mm", Locale.ENGLISH);
+    private final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("d/M\nh:mm aa", Locale.ENGLISH);
 
     TripsAdapter(Context context, List<Trip> data) {
         this.context = context;

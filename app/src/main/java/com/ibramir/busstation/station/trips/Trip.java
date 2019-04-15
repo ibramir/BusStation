@@ -91,8 +91,12 @@ public class Trip implements RetrieveListener<Vehicle> {
     public void reserveSeats(Ticket ticket, Vehicle.SeatClass seatClass) {
         vehicle.reserveSeats(ticket.getNumOfSeats(), seatClass);
     }
-    public void cancelReservation(int numOfSeats, Vehicle.SeatClass seatClass) {
-        vehicle.cancelReservation(numOfSeats, seatClass);
+    public void cancelReservation(Ticket t) {
+        cancelReservation(t, false);
+    }
+    public void cancelReservation(Ticket t, boolean roundTrip) {
+        vehicle.cancelReservation(t.getNumOfSeats(),(roundTrip)?t.getSeatClass2():t.getSeatClass());
+        TripManager.getInstance().save(this);
     }
 
     @Override

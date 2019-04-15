@@ -11,7 +11,6 @@ import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -30,7 +29,7 @@ public class Customer extends User implements RetrieveListener<Ticket> {
     Customer(String uid, String email, String name) {
         super(uid, email, name);
     }
-    public Collection<Ticket> getTickets() {
+    public List<Ticket> getTickets() {
         return tickets;
     }
 
@@ -51,11 +50,15 @@ public class Customer extends User implements RetrieveListener<Ticket> {
     public void cancelReservation(String ticketId) {
         for(Ticket t: tickets) {
             if(t.equals(ticketId)) {
-                t.revokeTicket();
-                tickets.remove(t);
+                cancelReservation(t);
                 return;
             }
         }
+    }
+    public void cancelReservation(Ticket t) {
+        t.revokeTicket();
+        tickets.remove(t);
+        UserManager.getInstance().save(this);
     }
 
     @Override

@@ -61,9 +61,9 @@ public class Ticket implements RetrieveListener<Trip> {
     }
 
     public void revokeTicket() {
-        trip1.cancelReservation(numOfSeats, seatClass);
+        trip1.cancelReservation(this);
         if(trip2 != null)
-            trip2.cancelReservation(numOfSeats, seatClass2);
+            trip2.cancelReservation(this, true);
         TicketManager.getInstance().delete(this);
     }
 

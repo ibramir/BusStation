@@ -95,7 +95,7 @@ public class TripManager implements FirestoreActions<Trip> {
         }
         else {
             listeners.put(tripId, retrieveListener);
-            new RetrieveTask().execute(tripId);
+            new RetrieveTripTask().execute(tripId);
         }
     }
 
@@ -120,7 +120,6 @@ public class TripManager implements FirestoreActions<Trip> {
                 Tasks.await(tripReference.update("tickets",
                         FieldValue.arrayUnion(t.getTicketIds().toArray())),
                         10,TimeUnit.SECONDS);
-                //t.initializeDataListener();
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
                 return null;
@@ -132,7 +131,7 @@ public class TripManager implements FirestoreActions<Trip> {
         }
     }
 
-    private static class RetrieveTask extends AsyncTask<String, Void, Trip> {
+    private static class RetrieveTripTask extends AsyncTask<String, Void, Trip> {
         @Override
         protected Trip doInBackground(String... strings) {
             try {
@@ -214,6 +213,7 @@ public class TripManager implements FirestoreActions<Trip> {
                                     }
                                 }
                             }
+                            TripManager.getInstance().notifyListeners();
                         }
                     });
             TripManager.getInstance().notifyListeners();

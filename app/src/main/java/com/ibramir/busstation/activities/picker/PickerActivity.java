@@ -31,8 +31,8 @@ public class PickerActivity extends AppCompatActivity {
         }
         else if(user instanceof Manager) {
             findViewById(R.id.myTripsButton).setVisibility(View.GONE);
-            //bookButton.setVisibility(View.GONE);
-            //bookRound.setVisibility(View.GONE);
+            bookButton.setVisibility(View.GONE);
+            bookRound.setVisibility(View.GONE);
         }
         else if(user instanceof Driver) {
             manageButton.setVisibility(View.GONE);
