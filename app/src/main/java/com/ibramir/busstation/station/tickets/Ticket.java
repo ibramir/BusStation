@@ -99,6 +99,9 @@ public class Ticket implements RetrieveListener<Trip> {
     void setTrip2Id(String trip2Id) {
         this.trip2Id = trip2Id;
     }
+    public void setSeatClass2(Vehicle.SeatClass seatClass2) {
+        this.seatClass2 = seatClass2;
+    }
 
     @Override
     public boolean equals(@Nullable Object obj) {

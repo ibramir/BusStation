@@ -39,12 +39,12 @@ public class Bus extends Vehicle {
     }
     @Override
     public void cancelReservation(int numOfSeats, SeatClass seatClass) {
-        super.cancelReservation(numOfSeats);
         switch (seatClass) {
             case ECONOMY: economySeats += numOfSeats; break;
             case COMFORT: comfortSeats += numOfSeats; break;
             case LUXURY: luxurySeats += numOfSeats; break;
         }
+        super.cancelReservation(numOfSeats);
     }
 
     @Override

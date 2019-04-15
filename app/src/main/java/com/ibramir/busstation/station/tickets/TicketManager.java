@@ -78,6 +78,9 @@ public class TicketManager implements FirestoreActions<Ticket> {
                 Ticket ret = new Ticket(d.getId(),d.getString("uid"),
                         d.getLong("numOfSeats").intValue(), d.getDouble("price"),
                         Vehicle.SeatClass.valueOf(d.getString("seatClass")));
+                String seatClass2 = d.getString("seatClass2");
+                if(seatClass2 != null)
+                    ret.setSeatClass2(Vehicle.SeatClass.valueOf(seatClass2));
                 TripManager tripManager = TripManager.getInstance();
                 String trip1Id = d.getDocumentReference("trip1").getId();
                 ret.setTrip1Id(trip1Id);

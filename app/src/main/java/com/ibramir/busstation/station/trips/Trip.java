@@ -78,6 +78,7 @@ public class Trip implements RetrieveListener<Vehicle> {
         time = ((Timestamp)data.get("time")).toDate();
         driverId = ((DocumentReference)data.get("driver")).getId();
         List<DocumentReference> tickets = (List<DocumentReference>) data.get("tickets");
+        ticketIds.clear();
         if(tickets != null)
             for(DocumentReference ticketRef: tickets)
                 ticketIds.add(ticketRef.getId());
@@ -104,6 +105,7 @@ public class Trip implements RetrieveListener<Vehicle> {
     }
     public void cancelReservation(Ticket t, boolean roundTrip) {
         vehicle.cancelReservation(t.getNumOfSeats(),(roundTrip)?t.getSeatClass2():t.getSeatClass());
+        ticketIds.remove(t.getTicketId());
         TripManager.getInstance().save(this);
     }
 

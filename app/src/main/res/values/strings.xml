@@ -7,4 +7,5 @@
     <string name="myTickets">My tickets</string>
     <string name="assignedTrips">Assigned trips</string>
     <string name="newTrip">New trip</string>
+    <string name="ticketInfo">Ticket info</string>
 </resources>

@@ -8,7 +8,6 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -70,18 +69,20 @@ public class UserManager implements FirestoreActions<User> {
             try {
                 FirebaseFirestore db = FirebaseFirestore.getInstance();
                 DocumentReference userRef = db.collection("users").document(u.getUid());
-                Tasks.await(userRef.set(data, SetOptions.merge()), 15, TimeUnit.SECONDS);
                 List<DocumentReference> typeSpecific;
                 if(u instanceof Customer) {
                     typeSpecific = getCustomerData((Customer) u);
-                    Tasks.await(userRef.update("tickets", FieldValue.arrayUnion(typeSpecific.toArray())),
-                            15, TimeUnit.SECONDS);
+                    data.put("tickets", typeSpecific);
+                    /*Tasks.await(userRef.update("tickets", FieldValue.arrayUnion(typeSpecific.toArray())),
+                            15, TimeUnit.SECONDS);*/
                 }
                 else if(u instanceof Driver) {
                     typeSpecific = getDriverData((Driver) u);
-                    Tasks.await(userRef.update("trips", FieldValue.arrayUnion(typeSpecific.toArray())),
-                            15, TimeUnit.SECONDS);
+                    data.put("trips", typeSpecific);
+                    /*Tasks.await(userRef.update("trips", FieldValue.arrayUnion(typeSpecific.toArray())),
+                            15, TimeUnit.SECONDS);*/
                 }
+                Tasks.await(userRef.set(data, SetOptions.merge()), 15, TimeUnit.SECONDS);
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             } catch (TimeoutException e) {

@@ -9,7 +9,6 @@ import com.google.firebase.firestore.DocumentChange;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -121,13 +120,14 @@ public class TripManager implements FirestoreActions<Trip> {
             for(String ticketId: t.getTicketIds()) {
                 ticketRefs.add(ticketsRef.document(ticketId));
             }
+            data.put("tickets", ticketRefs);
             try {
                 DocumentReference tripReference = db.collection("trips").document(t.getId());
                 Tasks.await(tripReference.set(data, SetOptions.merge()), 10, TimeUnit.SECONDS);
-                if(ticketRefs.size() > 0)
+                /*if(ticketRefs.size() > 0)
                     Tasks.await(tripReference.update("tickets",
                         FieldValue.arrayUnion(ticketRefs.toArray())),
-                        10,TimeUnit.SECONDS);
+                        10,TimeUnit.SECONDS);*/
             } catch (ExecutionException | InterruptedException e) {
                 e.printStackTrace();
                 return null;
