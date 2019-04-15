@@ -21,7 +21,7 @@ public class Driver extends User implements RetrieveListener<Trip>, OnTripsChang
     Driver(String uid, String email) {
         super(uid, email);
         assignedTrips = new ArrayList<>();
-        TripManager.getInstance().addChangeListener(this);
+        TripManager.getInstance().addTripsChangedListener(this);
     }
     Driver(String uid, String email, String name) {
         super(uid, email, name);

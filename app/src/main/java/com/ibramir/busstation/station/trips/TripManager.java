@@ -37,7 +37,7 @@ public class TripManager implements FirestoreActions<Trip> {
         return ourInstance;
     }
     private TripManager() { }
-    private List<OnTripsChangedListener> changeListeners = new ArrayList<>();
+    private Collection<OnTripsChangedListener> changeListeners = new HashSet<>();
 
     final private Map<String, RetrieveListener<Trip>> listeners = new HashMap<>();
     private List<Trip> trips;
@@ -49,7 +49,10 @@ public class TripManager implements FirestoreActions<Trip> {
         return trips;
     }
     public Trip findTripById(String id) {
-        return getTrips().get(trips.indexOf(Trip.ofId(id)));
+        int index = trips.indexOf(Trip.ofId(id));
+        if(index == -1)
+            return null;
+        return getTrips().get(index);
     }
     public synchronized void fetchTrips() {
         if(trips == null) {
@@ -58,7 +61,7 @@ public class TripManager implements FirestoreActions<Trip> {
         }
     }
     public synchronized void fetchTrips(OnTripsChangedListener listener) {
-        addChangeListener(listener);
+        addTripsChangedListener(listener);
         if(trips == null) {
             trips = new ArrayList<>();
             new RetrieveAllTask().execute();
@@ -226,7 +229,7 @@ public class TripManager implements FirestoreActions<Trip> {
         }
     }
 
-    public synchronized void addChangeListener(OnTripsChangedListener listener) {
+    public synchronized void addTripsChangedListener(OnTripsChangedListener listener) {
         if(listener != null)
             changeListeners.add(listener);
     }
@@ -244,9 +247,11 @@ public class TripManager implements FirestoreActions<Trip> {
                 .atTime(d.getTimestamp("time").toDate())
                 .withDriver((d.getDocumentReference("driver")).getId());
         Set<String> ticketIds = new HashSet<>();
-        for(DocumentReference ticketRef: (List<DocumentReference>)d.get("tickets")) {
-            ticketIds.add(ticketRef.getId());
-        }
+        List<DocumentReference> tickets = (List<DocumentReference>) d.get("tickets");
+        if(tickets != null)
+            for(DocumentReference ticketRef: tickets) {
+                ticketIds.add(ticketRef.getId());
+            }
         b.withTickets(ticketIds);
         Trip ret = b.build();
         VehicleManager.getInstance().retrieve((d.getDocumentReference("vehicle")).getId(),ret);

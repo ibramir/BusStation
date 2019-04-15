@@ -16,7 +16,7 @@ import com.ibramir.busstation.station.trips.TripManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DestinationSpinnerAdapter extends BaseAdapter implements AdapterView.OnItemSelectedListener {
+class DestinationSpinnerAdapter extends BaseAdapter implements AdapterView.OnItemSelectedListener {
     private TripsActivity context;
     private List<String> destinationList;
 

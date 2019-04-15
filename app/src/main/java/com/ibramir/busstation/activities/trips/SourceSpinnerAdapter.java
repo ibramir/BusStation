@@ -16,7 +16,7 @@ import com.ibramir.busstation.station.trips.TripManager;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SourceSpinnerAdapter extends BaseAdapter {
+class SourceSpinnerAdapter extends BaseAdapter {
 
     private Context context;
     private List<String> sourceList;

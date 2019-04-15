@@ -1,4 +1,4 @@
-package com.ibramir.busstation.activities.trips;
+package com.ibramir.busstation.activities.viewtrip;
 
 import android.content.Intent;
 import android.graphics.Color;
@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.ibramir.busstation.R;
 import com.ibramir.busstation.RetrieveListener;
@@ -48,9 +49,10 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
         economyText = findViewById(R.id.economyPrice),
         comfortText = findViewById(R.id.comfortPrice), luxuryText = findViewById(R.id.luxuryPrice);
         sourceText.setText(trip.getSource()); destinationText.setText(trip.getDestination());
-        timeText.setText(new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.ENGLISH).format(trip.getTime()));
+        timeText.setText(new SimpleDateFormat("h:m a d/M/yyyy", Locale.ENGLISH).format(trip.getTime()));
         Vehicle vehicle = trip.getVehicle();
         vehicleText.setText(vehicle.getClass().getSimpleName());
+
         economyButton = findViewById(R.id.economyButton);
         comfortButton = findViewById(R.id.comfortButton);
         luxuryButton = findViewById(R.id.luxuryButton);
@@ -121,6 +123,8 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
             result = RESULT_OK;
             finish();
         }
+        else
+            Toast.makeText(this,"Select seat class",Toast.LENGTH_SHORT).show();
     }
 
     @Override

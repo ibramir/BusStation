@@ -1,13 +1,10 @@
 package com.ibramir.busstation.users;
 
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
+import com.ibramir.busstation.station.trips.OnTripsChangedListener;
 import com.ibramir.busstation.station.trips.Trip;
+import com.ibramir.busstation.station.trips.TripManager;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 
 import java.util.ArrayList;
@@ -15,7 +12,7 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-public class Customer extends User implements RetrieveListener<Ticket> {
+public class Customer extends User implements RetrieveListener<Ticket>, OnTripsChangedListener {
 
     private List<Ticket> tickets;
 
@@ -25,6 +22,7 @@ public class Customer extends User implements RetrieveListener<Ticket> {
     Customer(String uid, String email) {
         super(uid, email);
         tickets = new ArrayList<>();
+        TripManager.getInstance().addTripsChangedListener(this);
     }
     Customer(String uid, String email, String name) {
         super(uid, email, name);
@@ -45,18 +43,9 @@ public class Customer extends User implements RetrieveListener<Ticket> {
         }
         Ticket ticket = Ticket.reserveTicket(this, trip1, seatClass, trip2, seatClass2, numOfSeats);
         tickets.add(ticket);
-        UserManager.getInstance().save(this);
         return true;
     }
-    public void cancelReservation(String ticketId) {
-        for(Ticket t: tickets) {
-            if(t.equals(ticketId)) {
-                cancelReservation(t);
-                return;
-            }
-        }
-    }
-    public void cancelReservation(Ticket t) {
+    private void cancelReservation(Ticket t) {
         t.revokeTicket();
         tickets.remove(t);
         UserManager.getInstance().save(this);
@@ -67,28 +56,20 @@ public class Customer extends User implements RetrieveListener<Ticket> {
         if(tickets.contains(obj))
             return;
         tickets.add(obj);
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-        TicketListener listener = new TicketListener(obj);
-        ListenerRegistration r = db.collection("trips").document(obj.getTicketId())
-                .addSnapshotListener(listener);
-        listener.registration = r;
     }
 
-    private class TicketListener implements EventListener<DocumentSnapshot> {
-        private Ticket ticket;
-        private ListenerRegistration registration;
-        private TicketListener(Ticket ticket) {
-            this.ticket = ticket;
-        }
-
-        @Override
-        public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-            if(documentSnapshot == null || !documentSnapshot.exists()) {
-                tickets.remove(ticket);
-                ticket = null;
-                registration.remove();
-                registration = null;
+    @Override
+    public void onTripsChanged() {
+        List<Trip> trips = TripManager.getInstance().getTrips();
+        List<Ticket> ticketsCopy = new ArrayList<>(tickets);
+        boolean changed = false;
+        for(Ticket t: ticketsCopy) {
+            if(!trips.contains(t.getTrip()) || t.getTrip2()!= null && !trips.contains(t.getTrip2())) {
+                cancelReservation(t);
+                changed = true;
             }
         }
+        if(changed)
+            UserManager.getInstance().save(this);
     }
 }

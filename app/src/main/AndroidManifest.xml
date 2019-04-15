@@ -12,7 +12,7 @@
         <activity android:name=".activities.tickets.ViewTicketActivity"></activity>
         <activity android:name=".activities.newtrip.NewTripActivity" />
         <activity android:name=".activities.tickets.TicketsActivity" />
-        <activity android:name=".activities.trips.ViewTripActivity" />
+        <activity android:name=".activities.viewtrip.ViewTripActivity" />
         <activity android:name=".activities.picker.PickerActivity" />
         <activity android:name=".activities.trips.TripsActivity" />
         <activity android:name=".activities.main.MainActivity">

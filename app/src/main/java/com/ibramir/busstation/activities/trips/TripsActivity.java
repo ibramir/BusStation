@@ -21,7 +21,9 @@ import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.ibramir.busstation.R;
+import com.ibramir.busstation.activities.newtrip.NewTripActivity;
 import com.ibramir.busstation.activities.picker.PickerActivity;
+import com.ibramir.busstation.activities.viewtrip.ViewTripActivity;
 import com.ibramir.busstation.station.trips.OnTripsChangedListener;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
@@ -41,6 +43,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     public static final int RC_BOOK = 100;
     public static final int RC_BOOK_ROUND = 101;
+    public static final int RC_DELETE_TRIP = 102;
 
     private Date dateFilter = null;
     private String sourceFilter = "All", destinationFilter;
@@ -64,8 +67,16 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             recyclerView.setHasFixedSize(true);
             if(User.getCurrentUser() instanceof Driver)
                 initializeDriver();
-            else if(User.getCurrentUser() instanceof Customer)
+            else
                 initialize();
+
+            changeListener = new OnTripsChangedListener() {
+                @Override
+                public void onTripsChanged() {
+                    updateData();
+                    adapter.notifyDataSetChanged();
+                }
+            };
         }
     };
 
@@ -102,14 +113,6 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
         recyclerView.setAdapter(adapter);
-
-        changeListener = new OnTripsChangedListener() {
-            @Override
-            public void onTripsChanged() {
-                updateData();
-                adapter.notifyDataSetChanged();
-            }
-        };
 
         updateData();
     }
@@ -166,7 +169,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
                 openFilter();
                 return true;
             case R.id.add_action:
-                //TODO add trip activity
+                startActivity(new Intent(this, NewTripActivity.class));
                 return true;
         }
         return super.onOptionsItemSelected(item);
@@ -215,8 +218,12 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             trip2 = clicked;
         Intent intent = new Intent(this, ViewTripActivity.class);
         intent.putExtra("tripId",clicked.getId());
-        startActivityForResult(intent,
-                (mode.equals(PickerActivity.BOOK_ONE)? RC_BOOK: RC_BOOK_ROUND));
+        int requestCode = RC_BOOK;
+        if(mode.equals(PickerActivity.BOOK_ROUND))
+            requestCode = RC_BOOK_ROUND;
+        else if(mode.equals(PickerActivity.MANAGE))
+            requestCode = RC_DELETE_TRIP;
+        startActivityForResult(intent,requestCode);
     }
 
     @Override
@@ -272,7 +279,11 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == RC_BOOK || requestCode == RC_BOOK_ROUND) {
+        if(requestCode == RC_DELETE_TRIP && resultCode == RESULT_OK) {
+            trip1.deleteTrip();
+            trip1 = null;
+        }
+        else if(requestCode == RC_BOOK || requestCode == RC_BOOK_ROUND) {
             if(resultCode == RESULT_OK) {
                 if(requestCode == RC_BOOK) {
                     seatClass1 = (Vehicle.SeatClass) data.getSerializableExtra("seatClass");

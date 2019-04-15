@@ -75,7 +75,9 @@ public class Trip implements RetrieveListener<Vehicle> {
         price = (double) data.get("price");
         time = ((Timestamp)data.get("time")).toDate();
         driverId = ((DocumentReference)data.get("driver")).getId();
-        ticketIds.addAll((Collection<String>) data.get("tickets"));
+        Collection<String> tickets = (Collection<String>) data.get("tickets");
+        if(tickets != null)
+            ticketIds.addAll(tickets);
     }
     public void deleteTrip() {
         vehicle.deleteVehicle();

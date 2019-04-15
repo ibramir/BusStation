@@ -10,6 +10,8 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
 import com.ibramir.busstation.FirestoreActions;
 import com.ibramir.busstation.RetrieveListener;
@@ -19,14 +21,21 @@ import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 
 public class UserManager implements FirestoreActions<User> {
+    public interface OnRetrieveDriversListener {
+        void onRetrieveDrivers(Collection<Driver> drivers);
+    }
+
     private static final UserManager ourInstance = new UserManager();
 
     public static UserManager getInstance() {
@@ -128,32 +137,74 @@ public class UserManager implements FirestoreActions<User> {
             }
             return null;
         }
-        private Customer getCustomer(DocumentSnapshot d) {
-            Customer ret = new Customer(d.getString("uid"), d.getString("email"));
-            ret.setName(d.getString("name"));
-            for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("tickets")) {
-                TicketManager.getInstance().retrieve(tRef.getId(),ret);
-            }
-            return ret;
-        }
-        private Manager getManager(DocumentSnapshot d) {
-            Manager ret = new Manager(d.getString("uid"), d.getString("email"));
-            ret.setName(d.getString("name"));
-            return ret;
-        }
-        private Driver getDriver(DocumentSnapshot d) {
-            Driver ret = new Driver(d.getString("uid"), d.getString("email"));
-            ret.setName(d.getString("name"));
-            for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("trips"))
-                TripManager.getInstance().retrieve(tRef.getId(), ret);
-            return ret;
-        }
         @Override
         protected void onPostExecute(User user) {
             super.onPostExecute(user);
             RetrieveListener<User> userRetrieveListener = getInstance().retrieveListeners.get(user.getUid());
             if(userRetrieveListener != null)
                 userRetrieveListener.onRetrieve(user);
+        }
+    }
+    private static Customer getCustomer(DocumentSnapshot d) {
+        Customer ret = new Customer(d.getString("uid"), d.getString("email"));
+        ret.setName(d.getString("name"));
+        for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("tickets")) {
+            TicketManager.getInstance().retrieve(tRef.getId(),ret);
+        }
+        return ret;
+    }
+    private static Manager getManager(DocumentSnapshot d) {
+        Manager ret = new Manager(d.getString("uid"), d.getString("email"));
+        ret.setName(d.getString("name"));
+        return ret;
+    }
+    private static Driver getDriver(DocumentSnapshot d) {
+        Driver ret = new Driver(d.getString("uid"), d.getString("email"));
+        ret.setName(d.getString("name"));
+        for(DocumentReference tRef: (ArrayList<DocumentReference>)d.get("trips"))
+            TripManager.getInstance().retrieve(tRef.getId(), ret);
+        return ret;
+    }
+    private static Driver getDriver(DocumentSnapshot d, boolean getAssignedTrips) {
+        if(getAssignedTrips)
+            return  getDriver(d);
+        Driver ret = new Driver(d.getString("uid"), d.getString("email"));
+        ret.setName(d.getString("name"));
+        return ret;
+    }
+
+    public void retrieveDrivers(OnRetrieveDriversListener listener) {
+        new RetrieveDriversTask(listener).execute();
+    }
+
+    private static class RetrieveDriversTask extends AsyncTask<Void, Void, Collection<Driver>> {
+        private OnRetrieveDriversListener listener;
+        private RetrieveDriversTask(OnRetrieveDriversListener listener) {
+            this.listener = listener;
+        }
+
+        @Override
+        protected Collection<Driver> doInBackground(Void... voids) {
+            FirebaseFirestore db = FirebaseFirestore.getInstance();
+            Query query = db.collection("users").whereEqualTo("type", Driver.class.getSimpleName());
+            try {
+                Set<Driver> drivers = new HashSet<>();
+                QuerySnapshot driversSnapshot = Tasks.await(query.get(), 15, TimeUnit.SECONDS);
+                for(DocumentSnapshot d: driversSnapshot) {
+                    drivers.add(getDriver(d, false));
+                }
+                return drivers;
+            } catch (ExecutionException | InterruptedException e) {
+                e.printStackTrace();
+            } catch (TimeoutException e) {
+                e.printStackTrace();
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Collection<Driver> drivers) {
+            listener.onRetrieveDrivers(drivers);
         }
     }
 }

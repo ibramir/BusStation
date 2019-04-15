@@ -6,4 +6,5 @@
     <string name="bookTwo">Book round trip</string>
     <string name="myTickets">My tickets</string>
     <string name="assignedTrips">Assigned trips</string>
+    <string name="newTrip">New trip</string>
 </resources>
