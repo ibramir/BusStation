@@ -35,7 +35,7 @@ public class UserManager implements FirestoreActions<User> {
     private UserManager() {
     }
 
-    private RetrieveListener<User> retrieveListener;
+    private Map<String,RetrieveListener<User>> retrieveListeners = new HashMap<>();
 
     @Override
     public void delete(User obj) {
@@ -81,8 +81,8 @@ public class UserManager implements FirestoreActions<User> {
             return null;
         }
 
-        private List<DocumentReference> getCustomerData(Customer c) {
-            List<Ticket> cTickets = c.getTickets();
+        private List<DocumentReference> getCustomerData(Customer customer) {
+            List<Ticket> cTickets = customer.getTickets();
             List<DocumentReference> ticketRefs = new ArrayList<>(cTickets.size());
             CollectionReference ref = FirebaseFirestore.getInstance().collection("tickets");
             for(Ticket t: cTickets)
@@ -90,11 +90,11 @@ public class UserManager implements FirestoreActions<User> {
             return ticketRefs;
         }
 
-        private List<DocumentReference> getDriverData(Driver u) {
+        private List<DocumentReference> getDriverData(Driver driver) {
             FirebaseFirestore db = FirebaseFirestore.getInstance();
             List<DocumentReference> tripRefs = new ArrayList<>();
             CollectionReference ref = db.collection("trips");
-            for(Trip t: u.getAssignedTrips())
+            for(Trip t: driver.getAssignedTrips())
                 tripRefs.add(ref.document(t.getId()));
             return tripRefs;
         }
@@ -102,7 +102,7 @@ public class UserManager implements FirestoreActions<User> {
 
     @Override
     public void retrieve(String id, RetrieveListener<User> retrieveListener) {
-        this.retrieveListener = retrieveListener;
+        retrieveListeners.put(id, retrieveListener);
         new RetrieveTask().execute(id);
     }
     private static class RetrieveTask extends AsyncTask<String,Void,User> {
@@ -151,8 +151,9 @@ public class UserManager implements FirestoreActions<User> {
         @Override
         protected void onPostExecute(User user) {
             super.onPostExecute(user);
-            if(getInstance().retrieveListener != null)
-                getInstance().retrieveListener.onRetrieve(user);
+            RetrieveListener<User> userRetrieveListener = getInstance().retrieveListeners.get(user.getUid());
+            if(userRetrieveListener != null)
+                userRetrieveListener.onRetrieve(user);
         }
     }
 }

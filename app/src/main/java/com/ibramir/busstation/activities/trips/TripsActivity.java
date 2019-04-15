@@ -22,11 +22,12 @@ import android.widget.TextView;
 
 import com.ibramir.busstation.R;
 import com.ibramir.busstation.activities.picker.PickerActivity;
+import com.ibramir.busstation.station.trips.OnTripsChangedListener;
 import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
-import com.ibramir.busstation.station.trips.TripsListener;
 import com.ibramir.busstation.station.vehicles.Vehicle;
 import com.ibramir.busstation.users.Customer;
+import com.ibramir.busstation.users.Driver;
 import com.ibramir.busstation.users.User;
 
 import java.text.SimpleDateFormat;
@@ -41,23 +42,34 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     public static final int RC_BOOK = 100;
     public static final int RC_BOOK_ROUND = 101;
 
-    private Date dateFilter;
-    private String sourceFilter, destinationFilter;
+    private Date dateFilter = null;
+    private String sourceFilter = "All", destinationFilter;
     private RecyclerView recyclerView;
     private TripsAdapter adapter;
+    private List<Trip> allTrips;
     private List<Trip> filteredTrips;
     private String mode;
     private Toolbar toolbar;
     private BaseAdapter sourceAdapter, destinationAdapter;
     private AlertDialog filterDialog;
-    private TripsListener changeListener = new TripsListener() {
+    private OnTripsChangedListener changeListener = new OnTripsChangedListener() {
         @Override
         public void onTripsChanged() {
             findViewById(R.id.progressFrame).setVisibility(View.GONE);
-            initialize();
+            toolbar = findViewById(R.id.toolbar);
+            toolbar.setTitleTextColor(Color.WHITE);
+            setSupportActionBar(toolbar);
+            recyclerView = findViewById(R.id.tripsRecycler);
+            recyclerView.setLayoutManager(new LinearLayoutManager(TripsActivity.this));
+            recyclerView.setHasFixedSize(true);
+            if(User.getCurrentUser() instanceof Driver)
+                initializeDriver();
+            else if(User.getCurrentUser() instanceof Customer)
+                initialize();
         }
     };
 
+    private Driver driver;
     private Trip trip1, trip2;
     private Vehicle.SeatClass seatClass1, seatClass2;
 
@@ -70,30 +82,36 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
         TripManager.getInstance().fetchTrips(changeListener);
     }
 
-    private void initialize() {
-        toolbar = findViewById(R.id.toolbar);
-        toolbar.setTitle(R.string.bookOne);
-        toolbar.setTitleTextColor(Color.WHITE);
-        setSupportActionBar(toolbar);
+    private void initializeDriver() {
+        toolbar.setTitle(R.string.assignedTrips);
+        driver = (Driver) User.getCurrentUser();
+        allTrips = driver.getAssignedTrips();
         filteredTrips = new ArrayList<>();
-        filteredTrips.addAll(TripManager.getInstance().getTrips());
+        adapter = new TripsAdapter(this, filteredTrips);
+        updateData();
+    }
+    private void initialize() {
+        toolbar.setTitle(R.string.bookOne);
+
+        allTrips = TripManager.getInstance().getTrips();
+        filteredTrips = new ArrayList<>();
 
         sourceAdapter = new SourceSpinnerAdapter(this);
         destinationAdapter = new DestinationSpinnerAdapter(this);
 
-        recyclerView = findViewById(R.id.tripsRecycler);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        recyclerView.setHasFixedSize(true);
         adapter = new TripsAdapter(this, filteredTrips);
         adapter.setOnClickListener(this);
         recyclerView.setAdapter(adapter);
 
-        changeListener = new TripsListener() {
+        changeListener = new OnTripsChangedListener() {
             @Override
             public void onTripsChanged() {
+                updateData();
                 adapter.notifyDataSetChanged();
             }
         };
+
+        updateData();
     }
 
     void setSourceFilter(String sourceFilter) {
@@ -128,7 +146,9 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if(mode.equals(PickerActivity.BOOK_ONE) || mode.equals(PickerActivity.BOOK_ROUND)) {
+        if(mode == null)
+            return super.onCreateOptionsMenu(menu);
+        else if(mode.equals(PickerActivity.BOOK_ONE) || mode.equals(PickerActivity.BOOK_ROUND)) {
             getMenuInflater().inflate(R.menu.trips_menu, menu);
             return true;
         }
@@ -156,7 +176,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             filterDialog.show();
             return;
         }
-        AlertDialog.Builder builder =new AlertDialog.Builder(this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Filter trips");
         builder.setCancelable(true);
 
@@ -206,7 +226,6 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
     }
 
     void updateData() {
-        List<Trip> allTrips = TripManager.getInstance().getTrips();
         filteredTrips.clear();
         if(sourceFilter.equals("All")) {
             if(dateFilter == null)

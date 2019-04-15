@@ -1,63 +1,48 @@
 package com.ibramir.busstation.users;
 
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.firebase.firestore.ListenerRegistration;
 import com.ibramir.busstation.RetrieveListener;
+import com.ibramir.busstation.station.trips.OnTripsChangedListener;
 import com.ibramir.busstation.station.trips.Trip;
+import com.ibramir.busstation.station.trips.TripManager;
 
-import java.util.Collection;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import javax.annotation.Nullable;
 
+public class Driver extends User implements RetrieveListener<Trip>, OnTripsChangedListener {
 
-public class Driver extends User implements RetrieveListener<Trip> {
-
-    private Collection<Trip> assignedTrips;
+    private List<Trip> assignedTrips;
 
     Driver(String uid) {
         this(uid, null);
     }
     Driver(String uid, String email) {
         super(uid, email);
-        assignedTrips = new HashSet<>();
+        assignedTrips = new ArrayList<>();
+        TripManager.getInstance().addChangeListener(this);
     }
     Driver(String uid, String email, String name) {
         super(uid, email, name);
     }
 
-    public Collection<Trip> getAssignedTrips() {
+    public List<Trip> getAssignedTrips() {
         return assignedTrips;
     }
 
     @Override
     public synchronized void onRetrieve(Trip obj) {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
         assignedTrips.add(obj);
-        TripListener listener = new TripListener(obj);
-        ListenerRegistration r = db.collection("trips").document(obj.getId())
-                .addSnapshotListener(listener);
-        listener.registration = r;
     }
 
-    private class TripListener implements EventListener<DocumentSnapshot> {
-        private Trip trip;
-        private ListenerRegistration registration;
-        private TripListener(Trip trip) {
-            this.trip = trip;
-        }
-
-        @Override
-        public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-            if(documentSnapshot == null || !documentSnapshot.exists()) {
-                assignedTrips.remove(trip);
-                trip = null;
-                registration.remove();
-                registration = null;
-            }
+    @Override
+    public void onTripsChanged() {
+        List<Trip> trips = TripManager.getInstance().getTrips();
+        Set<Trip> assignedCopy = new HashSet<>(assignedTrips);
+        for(Trip t: assignedCopy) {
+            if(!trips.contains(t))
+                assignedTrips.remove(t);
         }
     }
 }

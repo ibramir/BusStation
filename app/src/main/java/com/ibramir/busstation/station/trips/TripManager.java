@@ -37,7 +37,7 @@ public class TripManager implements FirestoreActions<Trip> {
         return ourInstance;
     }
     private TripManager() { }
-    private List<TripsListener> changeListeners = new ArrayList<>();
+    private List<OnTripsChangedListener> changeListeners = new ArrayList<>();
 
     final private Map<String, RetrieveListener<Trip>> listeners = new HashMap<>();
     private List<Trip> trips;
@@ -57,7 +57,7 @@ public class TripManager implements FirestoreActions<Trip> {
             new RetrieveAllTask().execute();
         }
     }
-    public synchronized void fetchTrips(TripsListener listener) {
+    public synchronized void fetchTrips(OnTripsChangedListener listener) {
         addChangeListener(listener);
         if(trips == null) {
             trips = new ArrayList<>();
@@ -226,12 +226,12 @@ public class TripManager implements FirestoreActions<Trip> {
         }
     }
 
-    public synchronized void addChangeListener(TripsListener listener) {
+    public synchronized void addChangeListener(OnTripsChangedListener listener) {
         if(listener != null)
             changeListeners.add(listener);
     }
     synchronized void notifyListeners() {
-        for(TripsListener listener: changeListeners)
+        for(OnTripsChangedListener listener: changeListeners)
             listener.onTripsChanged();
     }
 

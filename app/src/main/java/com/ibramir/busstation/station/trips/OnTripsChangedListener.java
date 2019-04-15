@@ -1,5 +1,5 @@
 package com.ibramir.busstation.station.trips;
 
-public interface TripsListener {
+public interface OnTripsChangedListener {
     void onTripsChanged();
 }
