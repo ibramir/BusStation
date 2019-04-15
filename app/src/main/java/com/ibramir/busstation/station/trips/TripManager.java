@@ -73,7 +73,6 @@ public class TripManager implements FirestoreActions<Trip> {
     @Override
     public synchronized void delete(Trip obj) {
         deleteTickets(obj.getId());
-        trips.remove(obj);
         FirebaseFirestore.getInstance().collection("trips").document(obj.getId()).delete();
     }
     private void deleteTickets(String tripId) {
@@ -232,6 +231,9 @@ public class TripManager implements FirestoreActions<Trip> {
     public synchronized void addTripsChangedListener(OnTripsChangedListener listener) {
         if(listener != null)
             changeListeners.add(listener);
+    }
+    public synchronized void removeTripsChangedListener(OnTripsChangedListener listener) {
+        changeListeners.remove(listener);
     }
     synchronized void notifyListeners() {
         for(OnTripsChangedListener listener: changeListeners)

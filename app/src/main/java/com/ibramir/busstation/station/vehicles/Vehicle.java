@@ -98,5 +98,7 @@ public abstract class Vehicle implements RetrieveListener<Trip> {
     public abstract double getSeatPrice(@Nullable SeatClass seatClass);
     public abstract boolean hasSeatClass(SeatClass seatClass);
     public abstract boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass);
+    public abstract int getAvailableSeats(SeatClass seatClass);
+    public abstract int getMaxSeats(SeatClass seatClass);
     abstract void initFromDocument(DocumentSnapshot d);
 }

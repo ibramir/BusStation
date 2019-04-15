@@ -39,7 +39,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class TripsActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener {
+public class TripsActivity extends AppCompatActivity
+        implements View.OnClickListener, AdapterView.OnItemSelectedListener, OnTripsChangedListener {
 
     public static final int RC_BOOK = 100;
     public static final int RC_BOOK_ROUND = 101;
@@ -70,13 +71,10 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             else
                 initialize();
 
-            changeListener = new OnTripsChangedListener() {
-                @Override
-                public void onTripsChanged() {
-                    updateData();
-                    adapter.notifyDataSetChanged();
-                }
-            };
+            TripManager tripManager = TripManager.getInstance();
+            tripManager.removeTripsChangedListener(this);
+            changeListener = null;
+            tripManager.addTripsChangedListener(TripsActivity.this);
         }
     };
 
@@ -321,5 +319,11 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
             customer.reserveTicket(trip1, seatClass1, trip2, seatClass2, 1);
         }
         super.finish();
+    }
+
+    @Override
+    public void onTripsChanged() {
+        updateData();
+        adapter.notifyDataSetChanged();
     }
 }

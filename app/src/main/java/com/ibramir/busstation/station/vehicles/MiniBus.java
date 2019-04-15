@@ -41,13 +41,27 @@ public class MiniBus extends Vehicle {
 
     @Override
     public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
+        return getAvailableSeats(seatClass) >= numOfSeats;
+    }
+    @Override
+    public int getAvailableSeats(@Nullable SeatClass seatClass) {
         if(seatClass == null)
-            return getAvailableSeats() >= numOfSeats;
+            return super.getAvailableSeats();
         if(seatClass == SeatClass.ECONOMY)
-            return economySeats-numOfSeats >= 0;
+            return economySeats;
         if(seatClass == SeatClass.COMFORT)
-            return comfortSeats-numOfSeats >= 0;
-        return false;
+            return comfortSeats;
+        return 0;
+    }
+    @Override
+    public int getMaxSeats(SeatClass seatClass) {
+        if(seatClass == null)
+            return MAX_COMFORT + MAX_ECONOMY;
+        if(seatClass == SeatClass.ECONOMY)
+            return MAX_ECONOMY;
+        if(seatClass == SeatClass.COMFORT)
+            return MAX_COMFORT;
+        return 0;
     }
 
     @Override

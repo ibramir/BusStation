@@ -49,15 +49,31 @@ public class Bus extends Vehicle {
 
     @Override
     public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
+        return getAvailableSeats(seatClass) >= numOfSeats;
+    }
+    @Override
+    public int getAvailableSeats(SeatClass seatClass) {
         if(seatClass == null)
-            return getAvailableSeats() >= numOfSeats;
+            return super.getAvailableSeats();
         if(seatClass == SeatClass.ECONOMY)
-            return economySeats >= numOfSeats;
+            return economySeats;
         if(seatClass == SeatClass.COMFORT)
-            return comfortSeats >= numOfSeats;
+            return comfortSeats;
         if(seatClass == SeatClass.LUXURY)
-            return luxurySeats >= numOfSeats;
-        return false;
+            return luxurySeats;
+        return 0;
+    }
+    @Override
+    public int getMaxSeats(SeatClass seatClass) {
+        if(seatClass == null)
+            return MAX_ECONOMY + MAX_COMFOT + MAX_LUXURY;
+        if(seatClass == SeatClass.ECONOMY)
+            return MAX_ECONOMY;
+        if(seatClass == SeatClass.COMFORT)
+            return MAX_COMFOT;
+        if(seatClass == SeatClass.LUXURY)
+            return MAX_LUXURY;
+        return 0;
     }
 
     @Override

@@ -5,10 +5,12 @@ import com.google.firebase.firestore.DocumentReference;
 import com.ibramir.busstation.RetrieveListener;
 import com.ibramir.busstation.station.tickets.Ticket;
 import com.ibramir.busstation.station.vehicles.Vehicle;
+import com.ibramir.busstation.station.vehicles.VehicleManager;
 
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -75,9 +77,11 @@ public class Trip implements RetrieveListener<Vehicle> {
         price = (double) data.get("price");
         time = ((Timestamp)data.get("time")).toDate();
         driverId = ((DocumentReference)data.get("driver")).getId();
-        Collection<String> tickets = (Collection<String>) data.get("tickets");
+        List<DocumentReference> tickets = (List<DocumentReference>) data.get("tickets");
         if(tickets != null)
-            ticketIds.addAll(tickets);
+            for(DocumentReference ticketRef: tickets)
+                ticketIds.add(ticketRef.getId());
+        VehicleManager.getInstance().retrieve(((DocumentReference)data.get("vehicle")).getId(), this);
     }
     public void deleteTrip() {
         vehicle.deleteVehicle();

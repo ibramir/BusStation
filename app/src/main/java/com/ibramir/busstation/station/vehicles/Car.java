@@ -29,6 +29,14 @@ public class Car extends Vehicle {
     public boolean availableSeats(int numOfSeats, @Nullable SeatClass seatClass) {
         return getAvailableSeats() >= numOfSeats;
     }
+    @Override
+    public int getAvailableSeats(SeatClass seatClass) {
+        return super.getAvailableSeats();
+    }
+    @Override
+    public int getMaxSeats(SeatClass seatClass) {
+        return MAX_SEATS;
+    }
 
     @Override
     void initFromDocument(DocumentSnapshot d) { }
