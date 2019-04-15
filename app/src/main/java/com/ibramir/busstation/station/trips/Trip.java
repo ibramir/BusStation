@@ -90,6 +90,8 @@ public class Trip implements RetrieveListener<Vehicle> {
     }
     public void reserveSeats(Ticket ticket, Vehicle.SeatClass seatClass) {
         vehicle.reserveSeats(ticket.getNumOfSeats(), seatClass);
+        ticketIds.add(ticket.getTicketId());
+        TripManager.getInstance().save(this);
     }
     public void cancelReservation(Ticket t) {
         cancelReservation(t, false);

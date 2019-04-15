@@ -15,6 +15,7 @@ public class Ticket implements RetrieveListener<Trip> {
     private String ticketId;
     private String uid;
     private Trip trip1, trip2;
+    private String trip1Id, trip2Id;
     private int numOfSeats;
     private double price;
     private Vehicle.SeatClass seatClass, seatClass2;
@@ -22,10 +23,10 @@ public class Ticket implements RetrieveListener<Trip> {
     public static Ticket reserveTicket(Customer customer, Trip trip1, Vehicle.SeatClass seatClass, @Nullable Trip trip2,
                                        @Nullable Vehicle.SeatClass seatClass2, int numOfSeats) {
         Ticket t = new Ticket(customer.getUid(), trip1, seatClass, trip2, seatClass2, numOfSeats);
+        t.ticketId = UUID.randomUUID().toString();
         trip1.reserveSeats(t, seatClass);
         if(trip2 != null)
             trip2.reserveSeats(t, seatClass2);
-        t.ticketId = UUID.randomUUID().toString();
         TicketManager.getInstance().save(t);
         return t;
     }
@@ -92,6 +93,13 @@ public class Ticket implements RetrieveListener<Trip> {
         return seatClass2;
     }
 
+    void setTrip1Id(String trip1Id) {
+        this.trip1Id = trip1Id;
+    }
+    void setTrip2Id(String trip2Id) {
+        this.trip2Id = trip2Id;
+    }
+
     @Override
     public boolean equals(@Nullable Object obj) {
         if(obj == this)
@@ -104,10 +112,12 @@ public class Ticket implements RetrieveListener<Trip> {
     }
 
     @Override
-    public void onRetrieve(Trip obj) {
-        if(trip1 == null)
-            trip1 = obj;
-        else if(trip2 == null)
-            trip2 = obj;
+    public synchronized void onRetrieve(Trip trip) {
+        if(trip != null) {
+            if(trip.getId().equals(trip1Id))
+                trip1 = trip;
+            else if(trip.getId().equals(trip2Id))
+                trip2 = trip;
+        }
     }
 }

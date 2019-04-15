@@ -45,6 +45,7 @@ public class Customer extends User implements RetrieveListener<Ticket> {
         }
         Ticket ticket = Ticket.reserveTicket(this, trip1, seatClass, trip2, seatClass2, numOfSeats);
         tickets.add(ticket);
+        UserManager.getInstance().save(this);
         return true;
     }
     public void cancelReservation(String ticketId) {

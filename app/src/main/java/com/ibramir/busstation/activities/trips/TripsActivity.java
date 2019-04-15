@@ -286,7 +286,7 @@ public class TripsActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void finish() {
-        if(User.getCurrentUser() instanceof Customer) {
+        if(User.getCurrentUser() instanceof Customer && trip1 != null) {
             Customer customer = (Customer) User.getCurrentUser();
             customer.reserveTicket(trip1, seatClass1, trip2, seatClass2, 1);
         }

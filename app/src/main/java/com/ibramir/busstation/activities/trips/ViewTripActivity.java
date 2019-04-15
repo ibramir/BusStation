@@ -1,7 +1,9 @@
 package com.ibramir.busstation.activities.trips;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.support.v4.content.res.ResourcesCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -35,6 +37,7 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         toolbar.setTitle(R.string.bookOne);
+        toolbar.setTitleTextColor(Color.WHITE);
         setSupportActionBar(toolbar);
 
         trip = TripManager.getInstance().findTripById(getIntent().getStringExtra("tripId"));
@@ -44,7 +47,8 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
         comfortText = findViewById(R.id.comfortPrice), luxuryText = findViewById(R.id.luxuryPrice);
         sourceText.setText(trip.getSource()); destinationText.setText(trip.getDestination());
         timeText.setText(new SimpleDateFormat("HH:mm dd/MM/yyyy", Locale.ENGLISH).format(trip.getTime()));
-        vehicleText.setText(trip.getVehicle().getClass().getSimpleName());
+        Vehicle vehicle = trip.getVehicle();
+        vehicleText.setText(vehicle.getClass().getSimpleName());
         economyButton = findViewById(R.id.economyButton);
         comfortButton = findViewById(R.id.comfortButton);
         luxuryButton = findViewById(R.id.luxuryButton);
@@ -65,22 +69,43 @@ public class ViewTripActivity extends AppCompatActivity implements RetrieveListe
         driverText.setText(trip.getDriverId());
         UserManager.getInstance().retrieve(trip.getDriverId(),this);
 
-        if(trip.getVehicle().hasSeatClass(Vehicle.SeatClass.ECONOMY)) {
-            economyText.setText(String.valueOf(trip.getVehicle().getSeatPrice(Vehicle.SeatClass.ECONOMY)+trip.getPrice()));
+        if(vehicle.hasSeatClass(Vehicle.SeatClass.ECONOMY)) {
+            if(vehicle.availableSeats(1, Vehicle.SeatClass.ECONOMY))
+                economyText.setText(String.valueOf(
+                        (int)(vehicle.getSeatPrice(Vehicle.SeatClass.ECONOMY)+trip.getPrice())));
+            else {
+                economyText.setText("FULL");
+                economyText.setTextColor(ResourcesCompat.getColor(getResources(),R.color.fullRed,null));
+                economyButton.setEnabled(false);
+            }
         }
         else {
             economyText.setVisibility(View.GONE);
             economyButton.setVisibility(View.INVISIBLE);
         }
-        if(trip.getVehicle().hasSeatClass(Vehicle.SeatClass.COMFORT)) {
-            comfortText.setText(String.valueOf(trip.getVehicle().getSeatPrice(Vehicle.SeatClass.COMFORT)+trip.getPrice()));
+        if(vehicle.hasSeatClass(Vehicle.SeatClass.COMFORT)) {
+            if(vehicle.availableSeats(1, Vehicle.SeatClass.COMFORT))
+                comfortText.setText(String.valueOf(
+                        (int)(vehicle.getSeatPrice(Vehicle.SeatClass.COMFORT)+trip.getPrice())));
+            else {
+                comfortText.setText("FULL");
+                comfortText.setTextColor(ResourcesCompat.getColor(getResources(),R.color.fullRed,null));
+                comfortButton.setEnabled(false);
+            }
         }
         else {
             comfortText.setVisibility(View.GONE);
             comfortButton.setVisibility(View.INVISIBLE);
         }
-        if(trip.getVehicle().hasSeatClass(Vehicle.SeatClass.LUXURY)) {
-            luxuryText.setText(String.valueOf(trip.getVehicle().getSeatPrice(Vehicle.SeatClass.LUXURY)+trip.getPrice()));
+        if(vehicle.hasSeatClass(Vehicle.SeatClass.LUXURY)) {
+            if(vehicle.availableSeats(1, Vehicle.SeatClass.LUXURY))
+                luxuryText.setText(String.valueOf(
+                        (int)(vehicle.getSeatPrice(Vehicle.SeatClass.LUXURY)+trip.getPrice())));
+            else {
+                luxuryText.setText("FULL");
+                luxuryText.setTextColor(ResourcesCompat.getColor(getResources(),R.color.fullRed,null));
+                luxuryButton.setEnabled(false);
+            }
         }
         else{
             luxuryText.setVisibility(View.GONE);

@@ -19,7 +19,6 @@ import com.ibramir.busstation.station.trips.Trip;
 import com.ibramir.busstation.station.trips.TripManager;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,7 +82,7 @@ public class UserManager implements FirestoreActions<User> {
         }
 
         private List<DocumentReference> getCustomerData(Customer c) {
-            Collection<Ticket> cTickets = c.getTickets();
+            List<Ticket> cTickets = c.getTickets();
             List<DocumentReference> ticketRefs = new ArrayList<>(cTickets.size());
             CollectionReference ref = FirebaseFirestore.getInstance().collection("tickets");
             for(Ticket t: cTickets)

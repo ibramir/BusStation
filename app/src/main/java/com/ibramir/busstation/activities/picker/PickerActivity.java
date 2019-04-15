@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
 import com.ibramir.busstation.R;
+import com.ibramir.busstation.activities.tickets.TicketsActivity;
 import com.ibramir.busstation.activities.trips.TripsActivity;
 import com.ibramir.busstation.users.Customer;
 import com.ibramir.busstation.users.Driver;
@@ -51,6 +52,7 @@ public class PickerActivity extends AppCompatActivity {
         startActivity(intent);
     }
     public void myTrips(View v) {
-
+        if(User.getCurrentUser() instanceof Customer)
+            startActivity(new Intent(this, TicketsActivity.class));
     }
 }

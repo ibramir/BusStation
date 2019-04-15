@@ -72,7 +72,7 @@ public class TicketsAdapter extends RecyclerView.Adapter<TicketsAdapter.TicketHo
             destinationText.setText(t1.getSource()+" - "+ t1.getDestination());
             dateText.setText(DATE_FORMAT.format(t1.getTime()));
             vIcon.setImageResource(getVehicleIcon(t1));
-            priceText.setText(String.format(Locale.ENGLISH,".2%f",t.getPrice()));
+            priceText.setText(String.valueOf((int)t.getPrice()));
             Trip t2 = t.getTrip2();
             if(t2 == null) {
                 returnTripContainer.setVisibility(View.GONE);

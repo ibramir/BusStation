@@ -43,10 +43,13 @@ public class TicketManager implements FirestoreActions<Ticket> {
             Map<String, Object> data = new HashMap<>();
             data.put("uid", t.getUid());
             data.put("trip1", db.collection("trips").document(t.getTrip().getId()));
-            data.put("trip2", db.collection("trips").document(t.getTrip2().getId()));
+            data.put("seatClass", t.getSeatClass().toString());
+            if(t.getTrip2() != null) { ;
+                data.put("trip2", db.collection("trips").document(t.getTrip2().getId()));
+                data.put("seatClass2", t.getSeatClass2().toString());
+            }
             data.put("numOfSeats", t.getNumOfSeats());
             data.put("price", t.getPrice());
-            data.put("seatClass", t.getSeatClass().toString());
             try {
                 Tasks.await(db.collection("tickets").document(t.getTicketId()).set(data),
                         15, TimeUnit.SECONDS);
@@ -75,8 +78,12 @@ public class TicketManager implements FirestoreActions<Ticket> {
                         d.getLong("numOfSeats").intValue(), d.getDouble("price"),
                         Vehicle.SeatClass.valueOf(d.getString("seatClass")));
                 TripManager tripManager = TripManager.getInstance();
-                tripManager.retrieve(d.getString("trip1"), ret);
-                tripManager.retrieve(d.getString("trip2"), ret);
+                String trip1Id = d.getString("trip1");
+                ret.setTrip1Id(trip1Id);
+                tripManager.retrieve(trip1Id, ret);
+                String trip2Id = d.getString("trip2");
+                ret.setTrip2Id(trip2Id);
+                tripManager.retrieve(trip2Id, ret);
                 return ret;
             } catch (InterruptedException | ExecutionException e) {
                 e.printStackTrace();
